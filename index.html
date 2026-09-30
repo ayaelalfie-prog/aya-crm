@@ -30,7 +30,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 <form id="clientForm"><input type="hidden" id="clientId"><div class="form-grid"><div class="field"><label>اسم العميل *</label><input id="cName" required></div><div class="field"><label>رقم الهاتف</label><input id="cPhone"></div><div class="field"><label>المشروع</label><input id="cProject" placeholder="مثال: النرجس الجديدة"></div><div class="field"><label>الميزانية</label><input id="cBudget" type="number"></div><div class="field"><label>الحالة</label><select id="cStatus"><option value="new">جديد</option><option value="followup">متابعة</option><option value="interested">مهتم</option><option value="contracted">تم التعاقد</option><option value="not_interested">غير مهتم</option></select></div><div class="field"><label>موعد المتابعة</label><input id="fDate" type="datetime-local"></div><div class="field full"><label id="labelNotes">ملاحظات</label><textarea id="cNotes"></textarea></div><div id="customFieldsContainer" class="full"></div><div class="field full"><label>ملاحظة المتابعة</label><input id="fNote" placeholder="مثال: الاتصال لإرسال الأسعار"></div></div><button class="primary" type="submit" style="width:100%">حفظ</button></form></div></div>
 <script>
 const SUPABASE_URL="https://flnbcyhgmhvoctibhdqz.supabase.co";
-const SUPABASE_KEY="sb_publishable_4oUbQU3Lq7RfGdRADTjXhQ_Cj61_FRr";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsbmJjeWhnbWh2b2N0aWJhd2hkcXoiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTc5MDY2NTc5MCwiZXhwIjoyMTA2MjQxNzkwfQ.z8CK0kHczJEOAAmYRamtEVfFE2d2T3jwYZYFflGorUA";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let user=null, clients=[], followups=[], fields=[];
 const $=id=>document.getElementById(id);
@@ -92,8 +92,27 @@ $("clientForm").onsubmit=async e=>{e.preventDefault();const id=$("clientId").val
 };
 $("search").oninput=render;$("filterFollow").onchange=render;$("addBtn").onclick=()=>openModal();$("addBtn2").onclick=()=>openModal();
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));$(b.dataset.page).classList.remove("hidden");$("pageTitle").textContent=b.textContent.replace(/^[^ ]+ /,"")});
-$("loginBtn").onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$("email").value,password:$("password").value});if(error)$("authMsg").textContent=error.message};
-$("signupBtn").onclick=async()=>{const {error}=await sb.auth.signUp({email:$("email").value,password:$("password").value});$("authMsg").textContent=error?error.message:"تم إنشاء الحساب. لو طلب منك تأكيد الإيميل، أكديه ثم سجّلي الدخول."};
+$("loginBtn").type="button";
+$("loginBtn").onclick=async()=>{
+ const btn=$("loginBtn"), msg=$("authMsg"); btn.disabled=true; btn.textContent="جاري الدخول...";
+ try{
+  const email=$("email").value.trim(), password=$("password").value;
+  if(!email||!password){msg.textContent="اكتبي الإيميل وكلمة المرور أولًا.";return}
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){msg.textContent="بيانات الدخول غير صحيحة أو الحساب يحتاج تأكيد الإيميل.";return}
+  msg.textContent="تم الدخول بنجاح...";
+  await start(data.session);
+ }catch(e){console.error(e);msg.textContent="حصل خطأ أثناء الدخول. اعملي تحديث للصفحة وجربي مرة أخرى."}
+ finally{btn.disabled=false;btn.textContent="دخول"}
+};
+$("signupBtn").onclick=async()=>{
+ try{
+  const email=$("email").value.trim(), password=$("password").value;
+  if(!email||!password){$("authMsg").textContent="اكتبي الإيميل وكلمة المرور أولًا.";return}
+  const {error}=await sb.auth.signUp({email,password});
+  $("authMsg").textContent=error?error.message:"تم إنشاء الحساب. لو ظهر تأكيد الإيميل، أكديه ثم سجّلي الدخول.";
+ }catch(e){$("authMsg").textContent="حصل خطأ أثناء إنشاء الحساب."}
+};
 $("logout").onclick=()=>sb.auth.signOut();
 async function start(s){user=s?.user||null;if(user){$("auth").classList.add("hidden");$("app").classList.remove("hidden");await load();notifySoon()}else{$("auth").classList.remove("hidden");$("app").classList.add("hidden")}}
 function notifySoon(){if(!("Notification"in window)||Notification.permission==="granted")return;Notification.requestPermission().catch(()=>{})}

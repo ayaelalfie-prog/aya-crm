@@ -29,6 +29,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 <div id="modal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h2 id="modalTitle">إضافة عميل</h2><button class="x" onclick="closeModal()">×</button></div>
 <form id="clientForm"><input type="hidden" id="clientId"><div class="form-grid"><div class="field"><label>اسم العميل *</label><input id="cName" required></div><div class="field"><label>رقم الهاتف</label><input id="cPhone"></div><div class="field"><label>المشروع</label><input id="cProject" placeholder="مثال: النرجس الجديدة"></div><div class="field"><label>الميزانية</label><input id="cBudget" type="number"></div><div class="field"><label>الحالة</label><select id="cStatus"><option value="new">جديد</option><option value="followup">متابعة</option><option value="interested">مهتم</option><option value="contracted">تم التعاقد</option><option value="not_interested">غير مهتم</option></select></div><div class="field"><label>موعد المتابعة</label><input id="fDate" type="datetime-local"></div><div class="field full"><label id="labelNotes">ملاحظات</label><textarea id="cNotes"></textarea></div><div id="customFieldsContainer" class="full"></div><div class="field full"><label>ملاحظة المتابعة</label><input id="fNote" placeholder="مثال: الاتصال لإرسال الأسعار"></div></div><button class="primary" type="submit" style="width:100%">حفظ</button></form></div></div>
 <script>
+window.addEventListener("error",e=>{const m=document.getElementById("authMsg");if(m)m.textContent="حصل خطأ في تشغيل الصفحة: "+(e.message||"خطأ غير معروف")});
 const SUPABASE_URL="https://flnbcyhgmhvoctibhdqz.supabase.co";
 const SUPABASE_KEY="sb_publishable_4oUbQU3Lq7RfGdRADTjXhQ_Cj61_FRr";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -92,7 +93,7 @@ $("clientForm").onsubmit=async e=>{e.preventDefault();const id=$("clientId").val
 };
 $("search").oninput=render;$("filterFollow").onchange=render;$("addBtn").onclick=()=>openModal();$("addBtn2").onclick=()=>openModal();
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));$(b.dataset.page).classList.remove("hidden");$("pageTitle").textContent=b.textContent.replace(/^[^ ]+ /,"")});
-$("loginBtn").type="button";
+$("loginBtn").type="button"; $("loginBtn").addEventListener("click", async function(ev){ev.preventDefault();});
 $("loginBtn").onclick=async()=>{
  const btn=$("loginBtn"), msg=$("authMsg"); btn.disabled=true; btn.textContent="جاري الدخول...";
  try{

@@ -18,7 +18,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 <body>
 <div id="auth" class="auth"><div class="auth-card"><div class="logo">Aya CRM</div><div class="sub">إدارة عملائك ومواعيد المتابعة من أي جهاز</div>
 <div id="authForm"><div class="field"><label>الإيميل</label><input id="email" type="email" placeholder="name@example.com"></div><div class="field"><label>كلمة المرور</label><input id="password" type="password" placeholder="••••••••"></div><button id="loginBtn" class="primary" style="width:100%">دخول</button><button id="signupBtn" class="secondary" style="width:100%;margin-top:8px">إنشاء حساب جديد</button><p id="authMsg" class="muted"></p></div></div></div>
-<div id="app" class="app hidden"><aside class="side"><div class="brand">Aya CRM</div><div class="nav"><button data-page="dashboard" class="active">🏠 الرئيسية</button><button data-page="clients">👥 العملاء</button><button data-page="followups">⏰ المتابعات</button><button data-page="settings">⚙️ الخانات</button></div><button id="logout" class="logout">تسجيل الخروج</button></aside>
+<div id="app" class="app hidden"><aside class="side"><div class="brand">Aya CRM</div><div class="nav"><button data-page="dashboard" class="active">🏠 الرئيسية</button><button data-page="clients">👥 العملاء</button><button data-page="followups">⏰ المتابعات</button><button data-page="settings">⚙️ الخانات</button><button data-page="backups">💾 النسخ الاحتياطية</button></div><button id="logout" class="logout">تسجيل الخروج</button></aside>
 <main class="main"><div class="top"><div><h1 id="pageTitle">الرئيسية</h1><div class="muted">متابعة العملاء العقاريين بسهولة</div></div><button id="addBtn" class="primary">+ إضافة عميل</button></div>
 <section id="dashboard" class="page"><div class="cards"><div class="card"><div class="muted">إجمالي العملاء</div><div id="mTotal" class="metric">0</div></div><div class="card"><div class="muted">متابعات اليوم</div><div id="mToday" class="metric">0</div></div><div class="card"><div class="muted">متابعات متأخرة</div><div id="mLate" class="metric">0</div></div><div class="card"><div class="muted">عملاء مهتمون</div><div id="mInterested" class="metric">0</div></div></div>
 <div class="grid"><div class="section"><h2>أقرب المتابعات</h2><div id="dashFollowups"></div></div><div class="section"><h2>آخر العملاء</h2><div id="dashClients"></div></div></div></section>
@@ -35,6 +35,22 @@ const SUPABASE_URL="https://flnbcyhgmhvoctibhdqz.supabase.co";
 const SUPABASE_KEY="sb_publishable_4oUbQU3Lq7RfGdRADTjXhQ_Cj61_FRr";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let user=null, clients=[], followups=[], fields=[];
+const earlyLoginBtn=$("loginBtn"), earlyAuthMsg=$("authMsg");
+if(earlyLoginBtn){
+ earlyLoginBtn.type="button";
+ earlyLoginBtn.onclick=async()=>{
+  earlyLoginBtn.disabled=true; earlyLoginBtn.textContent="جاري الدخول...";
+  try{
+   const email=$("email").value.trim(), password=$("password").value;
+   if(!email||!password){earlyAuthMsg.textContent="اكتبي الإيميل وكلمة المرور أولًا.";return}
+   const result=await sb.auth.signInWithPassword({email,password});
+   if(result.error){earlyAuthMsg.textContent=result.error.message||"بيانات الدخول غير صحيحة.";return}
+   earlyAuthMsg.textContent="تم الدخول بنجاح...";
+   await start(result.data.session);
+  }catch(e){console.error(e);earlyAuthMsg.textContent="حصل خطأ أثناء الدخول: "+(e.message||"خطأ غير معروف")}
+  finally{earlyLoginBtn.disabled=false;earlyLoginBtn.textContent="دخول"}
+ };
+}
 const $=id=>document.getElementById(id);
 const statusText={new:"جديد",followup:"متابعة",interested:"مهتم",contracted:"تم التعاقد",not_interested:"غير مهتم"};
 function badge(s){return '<span class="badge b-'+s+'">'+statusText[s]+'</span>'}
@@ -117,19 +133,7 @@ $("clientForm").onsubmit=async e=>{e.preventDefault();const id=$("clientId").val
 };
 $("search").oninput=render;$("filterFollow").onchange=render;$("addBtn").onclick=()=>openModal();$("addBtn2").onclick=()=>openModal();
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=async()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));$(b.dataset.page).classList.remove("hidden");$("pageTitle").textContent=b.textContent.replace(/^[^ ]+ /,"");if(b.dataset.page==="backups")await loadBackups()});
-$("loginBtn").type="button"; $("loginBtn").addEventListener("click", async function(ev){ev.preventDefault();});
-$("loginBtn").onclick=async()=>{
- const btn=$("loginBtn"), msg=$("authMsg"); btn.disabled=true; btn.textContent="جاري الدخول...";
- try{
-  const email=$("email").value.trim(), password=$("password").value;
-  if(!email||!password){msg.textContent="اكتبي الإيميل وكلمة المرور أولًا.";return}
-  const {data,error}=await sb.auth.signInWithPassword({email,password});
-  if(error){msg.textContent="بيانات الدخول غير صحيحة أو الحساب يحتاج تأكيد الإيميل.";return}
-  msg.textContent="تم الدخول بنجاح...";
-  await start(data.session);
- }catch(e){console.error(e);msg.textContent="حصل خطأ أثناء الدخول. اعملي تحديث للصفحة وجربي مرة أخرى."}
- finally{btn.disabled=false;btn.textContent="دخول"}
-};
+
 $("signupBtn").onclick=async()=>{
  try{
   const email=$("email").value.trim(), password=$("password").value;

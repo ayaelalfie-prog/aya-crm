@@ -24,7 +24,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 <div class="grid"><div class="section"><h2>أقرب المتابعات</h2><div id="dashFollowups"></div></div><div class="section"><h2>آخر العملاء</h2><div id="dashClients"></div></div></div></section>
 <section id="clients" class="page hidden"><div class="section"><div class="toolbar"><input id="search" placeholder="ابحث بالاسم أو الرقم أو المشروع"><button class="secondary" id="addBtn2">+ عميل جديد</button></div><div class="table-wrap"><table class="table"><thead><tr><th>العميل</th><th>الهاتف</th><th>المشروع</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="clientsBody"></tbody></table></div></div></section>
 <section id="followups" class="page hidden"><div class="section"><div class="toolbar"><select id="filterFollow"><option value="all">كل المتابعات</option><option value="open">غير مكتملة</option><option value="done">مكتملة</option></select></div><div id="followupsList"></div></div></section>
-<section id="settings" class="page hidden"><div class="section"><h2>تخصيص خانات العملاء</h2><div class="settings-note">غيّري أسماء الخانات الأساسية أو أضيفي خانات جديدة، وستظهر تلقائيًا عند إضافة أو تعديل العميل.</div><div id="fieldsList"></div><button id="saveFields" class="primary" style="margin-top:15px">حفظ أسماء الخانات</button><button id="addFieldBtn" class="secondary" style="margin-top:15px;margin-right:8px">+ إضافة خانة جديدة</button></div></section>
+<section id="settings" class="page hidden"><div class="section"><h2>تخصيص خانات العملاء</h2><div class="settings-note">غيّري أسماء الخانات الأساسية أو أضيفي خانات جديدة، وستظهر تلقائيًا عند إضافة أو تعديل العميل.</div><div id="fieldsList"></div><button id="saveFields" class="primary" style="margin-top:15px">حفظ أسماء الخانات</button><button id="addFieldBtn" class="secondary" style="margin-top:15px;margin-right:8px">+ إضافة خانة جديدة</button></div></section>\n<section id="backups" class="page hidden"><div class="section"><h2>💾 النسخ الاحتياطية</h2><div class="settings-note">يتم حفظ نسخة من العملاء والمتابعات والخانات المخصصة داخل قاعدة البيانات. يمكنك إنشاء نسخة الآن أو تنزيلها كملف، ثم استرجاع أي نسخة لاحقًا.</div><div class="toolbar"><button id="createBackup" class="primary">+ إنشاء نسخة احتياطية الآن</button><button id="downloadLatest" class="secondary">⬇️ تنزيل أحدث نسخة</button><input id="backupFile" type="file" accept=".json,application/json" style="max-width:260px"></div><div id="backupMsg" class="muted" style="margin:10px 0"></div><div class="table-wrap"><table class="table"><thead><tr><th>التاريخ</th><th>اسم النسخة</th><th>الحجم</th><th>إجراءات</th></tr></thead><tbody id="backupsBody"></tbody></table></div></div></section>
 </main></div>
 <div id="modal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h2 id="modalTitle">إضافة عميل</h2><button class="x" onclick="closeModal()">×</button></div>
 <form id="clientForm"><input type="hidden" id="clientId"><div class="form-grid"><div class="field"><label>اسم العميل *</label><input id="cName" required></div><div class="field"><label>رقم الهاتف</label><input id="cPhone"></div><div class="field"><label>المشروع</label><input id="cProject" placeholder="مثال: النرجس الجديدة"></div><div class="field"><label>الميزانية</label><input id="cBudget" type="number"></div><div class="field"><label>الحالة</label><select id="cStatus"><option value="new">جديد</option><option value="followup">متابعة</option><option value="interested">مهتم</option><option value="contracted">تم التعاقد</option><option value="not_interested">غير مهتم</option></select></div><div class="field"><label>موعد المتابعة</label><input id="fDate" type="datetime-local"></div><div class="field full"><label id="labelNotes">ملاحظات</label><textarea id="cNotes"></textarea></div><div id="customFieldsContainer" class="full"></div><div class="field full"><label>ملاحظة المتابعة</label><input id="fNote" placeholder="مثال: الاتصال لإرسال الأسعار"></div></div><button class="primary" type="submit" style="width:100%">حفظ</button></form></div></div>
@@ -116,7 +116,7 @@ $("clientForm").onsubmit=async e=>{e.preventDefault();const id=$("clientId").val
  closeModal();await load();notifySoon();
 };
 $("search").oninput=render;$("filterFollow").onchange=render;$("addBtn").onclick=()=>openModal();$("addBtn2").onclick=()=>openModal();
-document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));$(b.dataset.page).classList.remove("hidden");$("pageTitle").textContent=b.textContent.replace(/^[^ ]+ /,"")});
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=async()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));$(b.dataset.page).classList.remove("hidden");$("pageTitle").textContent=b.textContent.replace(/^[^ ]+ /,"");if(b.dataset.page==="backups")await loadBackups()});
 $("loginBtn").type="button"; $("loginBtn").addEventListener("click", async function(ev){ev.preventDefault();});
 $("loginBtn").onclick=async()=>{
  const btn=$("loginBtn"), msg=$("authMsg"); btn.disabled=true; btn.textContent="جاري الدخول...";
@@ -140,6 +140,46 @@ $("signupBtn").onclick=async()=>{
 };
 $("logout").onclick=()=>sb.auth.signOut();
 async function start(s){user=s?.user||null;if(user){$("auth").classList.add("hidden");$("app").classList.remove("hidden");await load();notifySoon()}else{$("auth").classList.remove("hidden");$("app").classList.add("hidden")}}
-function notifySoon(){if(!("Notification"in window)||Notification.permission==="granted")return;Notification.requestPermission().catch(()=>{})}
+async function getBackupSnapshot(){return {version:1,created_at:new Date().toISOString(),clients:clients,followups:followups,fields:fields};}
+async function loadBackups(){
+ const r=await sb.from("crm_backups").select("id,created_at,label,snapshot").eq("user_id",user.id).order("created_at",{ascending:false});
+ const rows=r.data||[]; const body=$("backupsBody");
+ body.innerHTML=rows.map(b=>'<tr><td>'+fmt(b.created_at)+'</td><td>'+esc(b.label)+'</td><td>'+Math.round(JSON.stringify(b.snapshot).length/1024)+' KB</td><td><div class="row-actions"><button class="secondary" onclick="downloadBackup(\''+b.id+'\')">تنزيل</button><button class="primary" onclick="restoreBackup(\''+b.id+'\')">استرجاع</button><button class="danger" onclick="deleteBackup(\''+b.id+'\')">حذف</button></div></td></tr>').join("")||'<tr><td colspan="4"><div class="empty">لا توجد نسخ احتياطية بعد</div></td></tr>';
+ window.__backups=rows;
+}
+async function createBackup(){
+ const msg=$("backupMsg"); msg.textContent="جاري إنشاء النسخة...";
+ const snapshot=await getBackupSnapshot();
+ const {error}=await sb.from("crm_backups").insert({user_id:user.id,label:"نسخة "+new Date().toLocaleString("ar-EG"),snapshot});
+ msg.textContent=error?"تعذر إنشاء النسخة الاحتياطية.":"تم إنشاء النسخة الاحتياطية بنجاح.";
+ await loadBackups();
+}
+window.downloadBackup=async id=>{const b=(window.__backups||[]).find(x=>x.id===id);if(!b)return;const blob=new Blob([JSON.stringify(b.snapshot,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aya-crm-backup-"+new Date(b.created_at).toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(a.href)};
+window.restoreBackup=async id=>{const b=(window.__backups||[]).find(x=>x.id===id);if(!b)return;if(!confirm("استرجاع هذه النسخة سيستبدل بيانات العملاء والمتابعات والخانات الحالية. يفضّل إنشاء نسخة حالية أولًا. هل تريدين المتابعة؟"))return;await restoreSnapshot(b.snapshot)};
+window.deleteBackup=async id=>{if(!confirm("حذف النسخة الاحتياطية؟"))return;await sb.from("crm_backups").delete().eq("id",id).eq("user_id",user.id);await loadBackups()};
+async function restoreSnapshot(s){
+ const msg=$("backupMsg"); msg.textContent="جاري الاسترجاع...";
+ try{
+  if(!s||!Array.isArray(s.clients)||!Array.isArray(s.followups)||!Array.isArray(s.fields))throw new Error("ملف النسخة غير صالح");
+  const current=await getBackupSnapshot();
+  await sb.from("crm_backups").insert({user_id:user.id,label:"نسخة تلقائية قبل الاسترجاع "+new Date().toLocaleString("ar-EG"),snapshot:current});
+  await sb.from("followups").delete().eq("user_id",user.id);
+  await sb.from("clients").delete().eq("user_id",user.id);
+  await sb.from("crm_fields").delete().eq("user_id",user.id);
+  const clientsClean=s.clients.map(({id,...x})=>({...x,user_id:user.id}));
+  if(clientsClean.length)await sb.from("clients").insert(clientsClean);
+  const fieldsClean=s.fields.map(({id,...x})=>({...x,user_id:user.id}));
+  if(fieldsClean.length)await sb.from("crm_fields").insert(fieldsClean);
+  const newClients=await sb.from("clients").select("id,name,phone,project").eq("user_id",user.id);
+  const oldByName=new Map((s.clients||[]).map(x=>[x.id,x]));
+  const followClean=s.followups.map(({id,...x})=>{const oldClient=oldByName.get(x.client_id);const newClient=(newClients.data||[]).find(n=>n.name===oldClient?.name&&n.phone===oldClient?.phone);return {...x,user_id:user.id,client_id:newClient?.id||null}}).filter(x=>x.client_id);
+  if(followClean.length)await sb.from("followups").insert(followClean);
+  await load(); await loadBackups(); msg.textContent="تم استرجاع النسخة بنجاح.";
+ }catch(e){console.error(e);msg.textContent="تعذر الاسترجاع: "+e.message}
+}
+$("createBackup").onclick=createBackup;
+$("downloadLatest").onclick=async()=>{if(!window.__backups?.length){await loadBackups()}if(window.__backups?.[0])downloadBackup(window.__backups[0].id);else $("backupMsg").textContent="لا توجد نسخة لتنزيلها."};
+$("backupFile").onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const s=JSON.parse(await file.text());if(!confirm("استرجاع ملف النسخة سيستبدل البيانات الحالية. هل تريدين المتابعة؟"))return;await restoreSnapshot(s)}catch(err){$("backupMsg").textContent="ملف النسخة غير صالح."}e.target.value=""};
+\nfunction notifySoon(){if(!("Notification"in window)||Notification.permission==="granted")return;Notification.requestPermission().catch(()=>{})}
 sb.auth.onAuthStateChange((_e,s)=>start(s));sb.auth.getSession().then(({data})=>start(data.session));
 </script></body></html>

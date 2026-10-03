@@ -35,7 +35,8 @@ const SUPABASE_URL="https://flnbcyhgmhvoctibhdqz.supabase.co";
 const SUPABASE_KEY="sb_publishable_4oUbQU3Lq7RfGdRADTjXhQ_Cj61_FRr";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let user=null, clients=[], followups=[], fields=[];
-const $=id=>document.getElementById(id);\nconst earlyLoginBtn=$("loginBtn"), earlyAuthMsg=$("authMsg");
+const $=id=>document.getElementById(id);
+const earlyLoginBtn=$("loginBtn"), earlyAuthMsg=$("authMsg");
 if(earlyLoginBtn){
  earlyLoginBtn.type="button";
  earlyLoginBtn.onclick=async()=>{

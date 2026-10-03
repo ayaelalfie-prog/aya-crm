@@ -52,7 +52,7 @@ if(earlyLoginBtn){
   finally{earlyLoginBtn.disabled=false;earlyLoginBtn.textContent="دخول"}
  };
 }
-const $=id=>document.getElementById(id);
+
 const statusText={new:"جديد",followup:"متابعة",interested:"مهتم",contracted:"تم التعاقد",not_interested:"غير مهتم"};
 function badge(s){return '<span class="badge b-'+s+'">'+statusText[s]+'</span>'}
 function fmt(d){return new Date(d).toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"})}

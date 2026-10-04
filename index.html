@@ -110,9 +110,18 @@ async function load(){
  await ensureFields();
  const c=await sb.from("clients").select("*").eq("user_id",user.id).order("created_at",{ascending:false});
  if(c.error) throw new Error("خطأ في تحميل العملاء: "+c.error.message);
- const f=await sb.from("followups").select("*,clients(name,phone)").eq("user_id",user.id).order("followup_at",{ascending:true});
- if(f.error) throw new Error("خطأ في تحميل المتابعات: "+f.error.message);
- clients=c.data||[]; followups=f.data||[];
+ clients=c.data||[];
+ const f=await sb.from("followups").select("*").eq("user_id",user.id).order("followup_at",{ascending:true});
+ if(f.error){console.warn("تعذر تحميل المتابعات:",f.error.message);followups=[]}
+ else{
+  followups=f.data||[];
+  if(followups.length){
+   const ids=[...new Set(followups.map(x=>x.client_id).filter(Boolean))];
+   const cr=ids.length?await sb.from("clients").select("id,name,phone").in("id",ids).eq("user_id",user.id):{data:[]};
+   const byId=new Map((cr.data||[]).map(x=>[x.id,x]));
+   followups=followups.map(x=>({...x,clients:byId.get(x.client_id)||null}));
+  }
+ }
  render(); renderFields();
 }
 function fieldLabel(key,fallback){return fields.find(f=>f.field_key===key)?.label||fallback}

@@ -239,6 +239,7 @@ async function restoreSnapshot(s){
 $("createBackup").onclick=createBackup;
 $("downloadLatest").onclick=async()=>{if(!window.__backups?.length){await loadBackups()}if(window.__backups?.[0])downloadBackup(window.__backups[0].id);else $("backupMsg").textContent="لا توجد نسخة لتنزيلها."};
 $("backupFile").onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const s=JSON.parse(await file.text());if(!confirm("استرجاع ملف النسخة سيستبدل البيانات الحالية. هل تريدين المتابعة؟"))return;await restoreSnapshot(s)}catch(err){$("backupMsg").textContent="ملف النسخة غير صالح."}e.target.value=""};
-\nfunction notifySoon(){if(!("Notification"in window)||Notification.permission==="granted")return;Notification.requestPermission().catch(()=>{})}
+
+function notifySoon(){if(!("Notification"in window)||Notification.permission==="granted")return;Notification.requestPermission().catch(()=>{})}
 sb.auth.onAuthStateChange((_e,s)=>start(s));sb.auth.getSession().then(({data})=>start(data.session));
 </script></body></html>

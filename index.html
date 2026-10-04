@@ -92,18 +92,28 @@ const statusText={new:"جديد",followup:"متابعة",interested:"مهتم",c
 function badge(s){return '<span class="badge b-'+s+'">'+statusText[s]+'</span>'}
 function fmt(d){return new Date(d).toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"})}
 async function ensureFields(){
- const {data}=await sb.from("crm_fields").select("*").eq("is_active",true).order("sort_order",{ascending:true});
- fields=data||[];
+ if(!user?.id) throw new Error("جلسة الدخول غير موجودة");
+ const q=await sb.from("crm_fields").select("*").eq("user_id",user.id).eq("is_active",true).order("sort_order",{ascending:true});
+ if(q.error) throw new Error("خطأ في تحميل الخانات: "+q.error.message);
+ fields=q.data||[];
  if(!fields.length){
   const defs=[["name","اسم العميل","text",true,1],["phone","رقم الهاتف","text",true,2],["project","المشروع","text",true,3],["budget","الميزانية","number",true,4],["status","الحالة","select",true,5],["notes","ملاحظات","textarea",true,6]];
-  await sb.from("crm_fields").insert(defs.map(d=>({user_id:user.id,field_key:d[0],label:d[1],field_type:d[2],is_system:d[3],sort_order:d[4],options:d[0]==="status"?["جديد","متابعة","مهتم","تم التعاقد","غير مهتم"]:[]})));
-  const r=await sb.from("crm_fields").select("*").eq("is_active",true).order("sort_order",{ascending:true}); fields=r.data||[];
+  const ins=await sb.from("crm_fields").insert(defs.map(d=>({user_id:user.id,field_key:d[0],label:d[1],field_type:d[2],is_system:d[3],sort_order:d[4],options:d[0]==="status"?["جديد","متابعة","مهتم","تم التعاقد","غير مهتم"]:[]})));
+  if(ins.error) throw new Error("تعذر إنشاء الخانات الأساسية: "+ins.error.message);
+  const r=await sb.from("crm_fields").select("*").eq("user_id",user.id).eq("is_active",true).order("sort_order",{ascending:true});
+  if(r.error) throw new Error("خطأ في إعادة تحميل الخانات: "+r.error.message);
+  fields=r.data||[];
  }
 }
 async function load(){
+ if(!user?.id) throw new Error("لم يتم التعرف على الحساب");
  await ensureFields();
- const [c,f]=await Promise.all([sb.from("clients").select("*").order("created_at",{ascending:false}),sb.from("followups").select("*,clients(name,phone)").order("followup_at",{ascending:true})]);
- clients=c.data||[]; followups=f.data||[]; render(); renderFields();
+ const c=await sb.from("clients").select("*").eq("user_id",user.id).order("created_at",{ascending:false});
+ if(c.error) throw new Error("خطأ في تحميل العملاء: "+c.error.message);
+ const f=await sb.from("followups").select("*,clients(name,phone)").eq("user_id",user.id).order("followup_at",{ascending:true});
+ if(f.error) throw new Error("خطأ في تحميل المتابعات: "+f.error.message);
+ clients=c.data||[]; followups=f.data||[];
+ render(); renderFields();
 }
 function fieldLabel(key,fallback){return fields.find(f=>f.field_key===key)?.label||fallback}
 function renderFields(){
@@ -179,7 +189,7 @@ $("signupBtn").onclick=async()=>{
  }catch(e){$("authMsg").textContent="حصل خطأ أثناء إنشاء الحساب."}
 };
 $("logout").onclick=()=>sb.auth.signOut();
-async function start(s){user=s?.user||null;if(user){$("auth").classList.add("hidden");$("app").classList.remove("hidden");await load();notifySoon()}else{$("auth").classList.remove("hidden");$("app").classList.add("hidden")}}
+async function start(s){user=s?.user||null;if(user){$("auth").classList.add("hidden");$("app").classList.remove("hidden");try{await load();notifySoon()}catch(e){console.error(e);$("auth").classList.remove("hidden");$("app").classList.add("hidden");$("authMsg").textContent="تم تسجيل الدخول لكن تعذر تحميل بيانات CRM: "+(e.message||"خطأ غير معروف")}}else{$("auth").classList.remove("hidden");$("app").classList.add("hidden")}}
 async function getBackupSnapshot(){return {version:1,created_at:new Date().toISOString(),clients:clients,followups:followups,fields:fields};}
 async function loadBackups(){
  const r=await sb.from("crm_backups").select("id,created_at,label,snapshot").eq("user_id",user.id).order("created_at",{ascending:false});

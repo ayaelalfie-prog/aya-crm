@@ -118,6 +118,7 @@ async function ensureFields(){
  }
 }
 
+window.ensureFields=ensureFields;
 const statusText={new:"جديد",followup:"متابعة",interested:"مهتم",contracted:"تم التعاقد",not_interested:"غير مهتم"};
 function badge(s){
  const sf=fields.find(f=>f.field_key==="status");
@@ -233,7 +234,7 @@ $("saveFields").onclick=async()=>{
   if(f.field_type==="select"){
    const oi=document.querySelector('[data-field-options="'+f.id+'"]');
    if(oi){
-    const labels=oi.value.split(/[,،\\n]/).map(x=>x.trim()).filter(Boolean);
+    const labels=oi.value.split(/[,،\n]/).map(x=>x.trim()).filter(Boolean);
     const oldOptions=f.options||[];
     const oldByLabel=new Map(oldOptions.map(o=>typeof o==="object"?[o.label,o]:[o,o]));
     data.options=labels.map(label=>{

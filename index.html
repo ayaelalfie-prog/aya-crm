@@ -90,21 +90,11 @@ if(earlyLoginBtn){
 }
 
 const statusText={new:"جديد",followup:"متابعة",interested:"مهتم",contracted:"تم التعاقد",not_interested:"غير مهتم"};
-function badge(s){return '<span class="badge b-'+s+'">'+statusText[s]+'</span>'}
-function fmt(d){return new Date(d).toLocaleString("ar-EG",{dateStyle:"medium",timeStyle:"short"})}
-async function ensureFields(){
- if(!user?.id) throw new Error("جلسة الدخول غير موجودة");
- const q=await sb.from("crm_fields").select("*").eq("user_id",user.id).eq("is_active",true).order("sort_order",{ascending:true});
- if(q.error) throw new Error("خطأ في تحميل الخانات: "+q.error.message);
- fields=q.data||[];
- if(!fields.length){
-  const defs=[["name","اسم العميل","text",true,1],["phone","رقم الهاتف","text",true,2],["project","المشروع","text",true,3],["budget","الميزانية","number",true,4],["status","الحالة","select",true,5],["notes","ملاحظات","textarea",true,6]];
-  const ins=await sb.from("crm_fields").insert(defs.map(d=>({user_id:user.id,field_key:d[0],label:d[1],field_type:d[2],is_system:d[3],sort_order:d[4],options:d[0]==="status"?["جديد","متابعة","مهتم","تم التعاقد","غير مهتم"]:[]})));
-  if(ins.error) throw new Error("تعذر إنشاء الخانات الأساسية: "+ins.error.message);
-  const r=await sb.from("crm_fields").select("*").eq("user_id",user.id).eq("is_active",true).order("sort_order",{ascending:true});
-  if(r.error) throw new Error("خطأ في إعادة تحميل الخانات: "+r.error.message);
-  fields=r.data||[];
- }
+function badge(s){
+ const sf=fields.find(f=>f.field_key==="status");
+ const opt=(sf?.options||[]).find(o=>typeof o==="object"?o.value===s:o===s);
+ const label=opt?(typeof opt==="object"?opt.label:opt):(statusText[s]||s||"—");
+ return '<span class="badge b-'+esc(s)+'">'+esc(label)+'</span>';
 }
 async function load(){
  if(!user?.id) throw new Error("لم يتم التعرف على الحساب");
@@ -131,7 +121,12 @@ async function load(){
 function fieldLabel(key,fallback){return fields.find(f=>f.field_key===key)?.label||fallback}
 function renderFields(){
  const box=$("fieldsList"); if(!box)return;
- box.innerHTML=fields.map(f=>'<div class="field-row"><input data-field-label="'+esc(f.id)+'" value="'+esc(f.label)+'"><span class="type-pill">'+({text:"نص",textarea:"نص طويل",number:"رقم",date:"تاريخ",select:"اختيارات"}[f.field_type]||f.field_type)+'</span><span class="muted">'+(f.is_system?"أساسية":"مخصصة")+'</span>'+(f.is_system?'<span></span>':'<button class="danger" onclick="deleteField(\''+f.id+'\')">حذف</button>')+'</div>').join("");
+ box.innerHTML=fields.map(f=>{
+  const type={text:"نص",textarea:"نص طويل",number:"رقم",date:"تاريخ",select:"اختيارات"}[f.field_type]||f.field_type;
+  const options=f.field_type==="select" ? ((f.options||[]).map(o=>typeof o==="object"?o.label:o).join("، ")) : "";
+  const optionsEditor=f.field_type==="select" ? '<div style="grid-column:1/-1;margin-top:6px"><div class="muted" style="margin-bottom:5px">اختيارات '+esc(f.label)+'</div><input data-field-options="'+esc(f.id)+'" value="'+esc(options)+'" placeholder="مثال: جديد، متابعة، مهتم، تم التعاقد"></div>' : "";
+  return '<div class="field-row" style="grid-template-columns:1.3fr 1fr auto auto;flex-wrap:wrap"><input data-field-label="'+esc(f.id)+'" value="'+esc(f.label)+'"><span class="type-pill">'+type+'</span><span class="muted">'+(f.is_system?"أساسية":"مخصصة")+'</span>'+(f.is_system?'<span></span>':'<button class="danger" onclick="deleteField(\\''+f.id+'\\')">حذف</button>')+optionsEditor+'</div>';
+ }).join("");
  $("clients").querySelector("thead").innerHTML='<tr><th>'+fieldLabel("name","العميل")+'</th><th>'+fieldLabel("phone","الهاتف")+'</th><th>'+fieldLabel("project","المشروع")+'</th><th>'+fieldLabel("status","الحالة")+'</th><th>واتساب</th><th>إجراءات</th></tr>';
 }
 function render(){
@@ -158,6 +153,15 @@ async function loadClientComments(clientId){
 window.deleteComment=async id=>{if(!confirm("حذف التعليق؟"))return;const r=await sb.from("client_comments").delete().eq("id",id).eq("user_id",user.id);if(r.error)return alert("تعذر حذف التعليق");clientComments=clientComments.filter(x=>x.id!==id);await loadClientComments($("clientId").value)};
 $("addCommentBtn").onclick=async()=>{const clientId=$("clientId").value, input=$("newComment"), comment=input.value.trim();if(!clientId)return alert("احفظي العميل أولًا، وبعدها أضيفي التعليق.");if(!comment)return;const r=await sb.from("client_comments").insert({user_id:user.id,client_id:clientId,comment}).select().single();if(r.error)return alert("تعذر إضافة التعليق");clientComments.unshift(r.data);input.value="";await loadClientComments(clientId)};
 
+function renderStatusOptions(selected){
+ const sel=$("cStatus"); if(!sel)return;
+ const sf=fields.find(f=>f.field_key==="status");
+ const raw=sf?.options?.length?sf.options:["جديد","متابعة","مهتم","تم التعاقد","غير مهتم"];
+ const known={جديد:"new",متابعة:"followup",مهتم:"interested","تم التعاقد":"contracted","غير مهتم":"not_interested"};
+ const opts=raw.map(o=>typeof o==="object"?o:{value:known[o]||o,label:o});
+ sel.innerHTML=opts.map(o=>'<option value="'+esc(o.value)+'">'+esc(o.label)+'</option>').join("");
+ if(selected && opts.some(o=>String(o.value)===String(selected)))sel.value=selected;
+}
 function openModal(c=null){
  $("modal").classList.remove("hidden");
  $("modalTitle").textContent=c?"تعديل العميل":"إضافة عميل";
@@ -167,6 +171,7 @@ function openModal(c=null){
  $("cProject").value=c?.project||"";
  $("cBudget").value=c?.budget||"";
  $("cStatus").value=c?.status||"new";
+ renderStatusOptions(c?.status||"new");
  $("cNotes").value=c?.notes||"";
  $("fDate").value="";
  $("fNote").value="";
@@ -190,15 +195,28 @@ window.editClient=id=>openModal(clients.find(c=>c.id===id));
 window.deleteClient=async id=>{if(!confirm("حذف العميل؟"))return;await sb.from("clients").delete().eq("id",id);await load()};
 window.closeFieldModal=()=>$("fieldModal").classList.add("hidden");
 window.deleteField=async id=>{if(!confirm("حذف هذه الخانة؟"))return;await sb.from("crm_fields").update({is_active:false}).eq("id",id).eq("user_id",user.id);await load()};
-$("saveFields").onclick=async()=>{for(const f of fields){const input=document.querySelector('[data-field-label="'+f.id+'"]');if(input&&input.value.trim())await sb.from("crm_fields").update({label:input.value.trim()}).eq("id",f.id).eq("user_id",user.id)}await load();alert("تم حفظ أسماء الخانات")};
-$("addFieldBtn").onclick=()=>{$("fieldModal").classList.remove("hidden");$("newFieldLabel").value="";$("newFieldType").value="text";$("newFieldOptions").value="";$("newFieldOptionsWrap").style.display="none"};
-$("newFieldType").onchange=()=>{$("newFieldOptionsWrap").style.display=$("newFieldType").value==="select"?"block":"none"};
-$("createField").onclick=async()=>{const label=$("newFieldLabel").value.trim();if(!label)return alert("اكتبي اسم الخانة");const key="custom_"+Date.now();const type=$("newFieldType").value;const options=type==="select"?$("newFieldOptions").value.split(",").map(x=>x.trim()).filter(Boolean):[];await sb.from("crm_fields").insert({user_id:user.id,field_key:key,label,field_type:type,options,sort_order:fields.length+1,is_system:false,is_active:true});$("fieldModal").classList.add("hidden");await load()};
-window.toggleFollow=async(id,v)=>{await sb.from("followups").update({completed:v}).eq("id",id).eq("user_id",user.id);await load()};
-$("clientForm").onsubmit=async e=>{e.preventDefault();const id=$("clientId").value;const custom_fields={};document.querySelectorAll("[data-custom-key]").forEach(el=>custom_fields[el.dataset.customKey]=el.value);const data={name:$("cName").value,phone:$("cPhone").value,project:$("cProject").value,budget:$("cBudget").value?Number($("cBudget").value):null,status:$("cStatus").value,notes:$("cNotes").value,custom_fields};let clientId=id;
- if(id){await sb.from("clients").update(data).eq("id",id).eq("user_id",user.id)}else{data.user_id=user.id;const r=await sb.from("clients").insert(data).select().single();clientId=r.data?.id}
- if($("fDate").value&&clientId){await sb.from("followups").insert({user_id:user.id,client_id:clientId,followup_at:new Date($("fDate").value).toISOString(),note:$("fNote").value})}
- closeModal();await load();notifySoon();
+$("saveFields").onclick=async()=>{
+ for(const f of fields){
+  const input=document.querySelector('[data-field-label="'+f.id+'"]');
+  const data={};
+  if(input&&input.value.trim())data.label=input.value.trim();
+  if(f.field_type==="select"){
+   const oi=document.querySelector('[data-field-options="'+f.id+'"]');
+   if(oi){
+    const labels=oi.value.split(/[,،\\n]/).map(x=>x.trim()).filter(Boolean);
+    const oldOptions=f.options||[];
+    const oldByLabel=new Map(oldOptions.map(o=>typeof o==="object"?[o.label,o]:[o,o]));
+    data.options=labels.map(label=>{
+     const old=oldByLabel.get(label);
+     if(old&&typeof old==="object")return old;
+     const known={جديد:"new",متابعة:"followup",مهتم:"interested","تم التعاقد":"contracted","غير مهتم":"not_interested"};
+     return {value:known[label]||("custom_"+Date.now()+"_"+Math.random().toString(36).slice(2,7)),label};
+    });
+   }
+  }
+  if(Object.keys(data).length)await sb.from("crm_fields").update(data).eq("id",f.id).eq("user_id",user.id);
+ }
+ await load(); renderStatusOptions(); alert("تم حفظ الخانات والاختيارات بنجاح");
 };
 $("search").oninput=render;$("filterFollow").onchange=render;$("addBtn").onclick=()=>openModal();$("addBtn2").onclick=()=>openModal();
 window.showPage=async function(page){document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));const target=document.getElementById(page);if(target)target.classList.remove("hidden");const btn=document.querySelector(".nav button[data-page=\""+page+"\"]");if(btn)document.getElementById("pageTitle").textContent=btn.textContent.replace(/^\S+\s*/,"");if(page==="backups")await loadBackups();};

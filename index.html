@@ -124,8 +124,9 @@ function renderFields(){
  box.innerHTML=fields.map(f=>{
   const type={text:"نص",textarea:"نص طويل",number:"رقم",date:"تاريخ",select:"اختيارات"}[f.field_type]||f.field_type;
   const options=f.field_type==="select" ? ((f.options||[]).map(o=>typeof o==="object"?o.label:o).join("، ")) : "";
-  const optionsEditor=f.field_type==="select" ? '<div style="grid-column:1/-1;margin-top:6px"><div class="muted" style="margin-bottom:5px">اختيارات '+esc(f.label)+'</div><input data-field-options="'+esc(f.id)+'" value="'+esc(options)+'" placeholder="مثال: جديد، متابعة، مهتم، تم التعاقد"></div>' : "";
-  return '<div class="field-row" style="grid-template-columns:1.3fr 1fr auto auto;flex-wrap:wrap"><input data-field-label="'+esc(f.id)+'" value="'+esc(f.label)+'"><span class="type-pill">'+type+'</span><span class="muted">'+(f.is_system?"أساسية":"مخصصة")+'</span>'+(f.is_system?'<span></span>':'<button class="danger" onclick="deleteField(\\''+f.id+'\\')">حذف</button>')+optionsEditor+'</div>';
+  const optionsEditor=f.field_type==="select" ? `<div style="grid-column:1/-1;margin-top:6px"><div class="muted" style="margin-bottom:5px">اختيارات ${esc(f.label)}</div><input data-field-options="${esc(f.id)}" value="${esc(options)}" placeholder="مثال: جديد، متابعة، مهتم، تم التعاقد"></div>` : "";
+  const deleteBtn=f.is_system?"":`<button class="danger" onclick="deleteField('${f.id}')">حذف</button>`;
+  return `<div class="field-row" style="grid-template-columns:1.3fr 1fr auto auto;flex-wrap:wrap"><input data-field-label="${esc(f.id)}" value="${esc(f.label)}"><span class="type-pill">${type}</span><span class="muted">${f.is_system?"أساسية":"مخصصة"}</span>${f.is_system?"<span></span>":deleteBtn}${optionsEditor}</div>`;
  }).join("");
  $("clients").querySelector("thead").innerHTML='<tr><th>'+fieldLabel("name","العميل")+'</th><th>'+fieldLabel("phone","الهاتف")+'</th><th>'+fieldLabel("project","المشروع")+'</th><th>'+fieldLabel("status","الحالة")+'</th><th>واتساب</th><th>إجراءات</th></tr>';
 }

@@ -103,8 +103,8 @@ async function load(){
  if(c.error) throw new Error("خطأ في تحميل العملاء: "+c.error.message);
  clients=c.data||[];
  const cm=await sb.from("client_comments").select("*").eq("user_id",user.id).order("created_at",{ascending:false});
- if(cm.error) throw new Error("خطأ في تحميل تعليقات العملاء: "+cm.error.message);
- clientComments=cm.data||[];
+ if(cm.error){console.warn("تعذر تحميل تعليقات العملاء:",cm.error.message);clientComments=[]}
+ else clientComments=cm.data||[];
  const f=await sb.from("followups").select("*").eq("user_id",user.id).order("followup_at",{ascending:true});
  if(f.error){console.warn("تعذر تحميل المتابعات:",f.error.message);followups=[]}
  else{
@@ -231,7 +231,21 @@ $("signupBtn").onclick=async()=>{
  }catch(e){$("authMsg").textContent="حصل خطأ أثناء إنشاء الحساب."}
 };
 $("logout").onclick=()=>sb.auth.signOut();
-async function start(s){user=s?.user||null;if(user){$("auth").classList.add("hidden");$("app").classList.remove("hidden");try{await load();notifySoon()}catch(e){console.error(e);$("auth").classList.remove("hidden");$("app").classList.add("hidden");$("authMsg").textContent="تم تسجيل الدخول لكن تعذر تحميل بيانات CRM: "+(e.message||"خطأ غير معروف")}}else{$("auth").classList.remove("hidden");$("app").classList.add("hidden")}}
+async function start(s){
+ user=s?.user||null;
+ if(!user){$("auth").classList.remove("hidden");$("app").classList.add("hidden");return}
+ $("auth").classList.add("hidden");$("app").classList.remove("hidden");
+ try{await load();notifySoon()}
+ catch(e){
+  console.error(e);
+  const msg="تعذر تحميل بعض بيانات CRM: "+(e.message||"خطأ غير معروف");
+  console.error(msg);
+  const title=$("pageTitle");
+  if(title)title.textContent="الرئيسية";
+  const dash=$("dashboard");
+  if(dash && !clients.length)dash.insertAdjacentHTML("afterbegin",'<div class="settings-note" style="margin-bottom:14px">'+esc(msg)+'</div>');
+ }
+}
 async function getBackupSnapshot(){return {version:1,created_at:new Date().toISOString(),clients:clients,followups:followups,fields:fields};}
 async function loadBackups(){
  const r=await sb.from("crm_backups").select("id,created_at,label,snapshot").eq("user_id",user.id).order("created_at",{ascending:false});

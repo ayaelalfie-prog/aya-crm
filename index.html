@@ -53,12 +53,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
    const r=await client.auth.signInWithPassword({email,password});
    if(r.error){msg.textContent="لم يتم الدخول: "+(r.error.message||"بيانات الدخول غير صحيحة");return;}
    msg.textContent="تم الدخول بنجاح، جاري فتح النظام...";
-   if(typeof window.start==="function"){await window.start(r.data.session);}
-   else{
-    document.getElementById("auth").classList.add("hidden");
-    document.getElementById("app").classList.remove("hidden");
-    msg.textContent="";
-   }
+   await window.start(r.data.session);
   }catch(e){console.error(e); msg.textContent="حصل خطأ: "+(e?.message||"خطأ غير معروف");}
   finally{btn.disabled=false;btn.textContent="دخول";}
  };
@@ -226,6 +221,18 @@ window.editClient=id=>openModal(clients.find(c=>c.id===id));
 window.deleteClient=async id=>{if(!confirm("حذف العميل؟"))return;await sb.from("clients").delete().eq("id",id);await load()};
 window.closeFieldModal=()=>$("fieldModal").classList.add("hidden");
 window.deleteField=async id=>{if(!confirm("حذف هذه الخانة؟"))return;await sb.from("crm_fields").update({is_active:false}).eq("id",id).eq("user_id",user.id);await load()};
+$("addFieldBtn").onclick=()=>$("fieldModal").classList.remove("hidden");
+$("newFieldType").onchange=()=>{$("newFieldOptionsWrap").style.display=$("newFieldType").value==="select"?"block":"none"};
+$("createField").onclick=async()=>{
+ const label=$("newFieldLabel").value.trim(), type=$("newFieldType").value;
+ if(!label){alert("اكتبي اسم الخانة أولًا");return}
+ const options=type==="select"?$("newFieldOptions").value.split(/[,،\n]/).map(x=>x.trim()).filter(Boolean):[];
+ const key="custom_"+Date.now();
+ const {error}=await sb.from("crm_fields").insert({user_id:user.id,field_key:key,label,field_type:type,options,is_system:false,is_active:true,sort_order:(fields.reduce((m,x)=>Math.max(m,x.sort_order||0),0)+1)});
+ if(error){alert("تعذر إضافة الخانة: "+error.message);return}
+ $("newFieldLabel").value="";$("newFieldOptions").value="";$("newFieldOptionsWrap").style.display="none";$("fieldModal").classList.add("hidden");
+ await load();showPage("settings");
+};
 $("saveFields").onclick=async()=>{
  for(const f of fields){
   const input=document.querySelector('[data-field-label="'+f.id+'"]');
@@ -261,7 +268,7 @@ $("signupBtn").onclick=async()=>{
  }catch(e){$("authMsg").textContent="حصل خطأ أثناء إنشاء الحساب."}
 };
 $("logout").onclick=()=>sb.auth.signOut();
-async function start(s){
+window.start=async function start(s){
  user=s?.user||null;
  if(!user){$("auth").classList.remove("hidden");$("app").classList.add("hidden");return}
  $("auth").classList.add("hidden");$("app").classList.remove("hidden");

@@ -89,6 +89,35 @@ if(earlyLoginBtn){
  };
 }
 
+async function ensureFields(){
+ const defaults=[
+  ["name","اسم العميل","text",true,1,[]],
+  ["phone","رقم الهاتف","text",true,2,[]],
+  ["project","المشروع","text",true,3,[]],
+  ["budget","الميزانية","number",true,4,[]],
+  ["status","الحالة","select",true,5,["جديد","متابعة","مهتم","تم التعاقد","غير مهتم"]],
+  ["notes","ملاحظات","textarea",true,6,[]]
+ ];
+ const r=await sb.from("crm_fields").select("*").eq("user_id",user.id).order("sort_order",{ascending:true});
+ if(r.error)throw new Error("خطأ في تحميل الخانات: "+r.error.message);
+ const existing=r.data||[];
+ if(!existing.length){
+  const rows=defaults.map(x=>({user_id:user.id,field_key:x[0],label:x[1],field_type:x[2],is_system:x[3],sort_order:x[4],options:x[5],is_active:true}));
+  const ins=await sb.from("crm_fields").insert(rows).select("*");
+  if(ins.error)throw new Error("خطأ في إنشاء الخانات الأساسية: "+ins.error.message);
+  fields=ins.data||[];
+ }else{
+  fields=existing.filter(x=>x.is_active!==false);
+  const byKey=new Map(fields.map(x=>[x.field_key,x]));
+  const missing=defaults.filter(x=>!byKey.has(x[0])).map(x=>({user_id:user.id,field_key:x[0],label:x[1],field_type:x[2],is_system:x[3],sort_order:x[4],options:x[5],is_active:true}));
+  if(missing.length){
+   const ins=await sb.from("crm_fields").insert(missing).select("*");
+   if(ins.error)throw new Error("خطأ في استكمال الخانات: "+ins.error.message);
+   fields=[...fields,...(ins.data||[])].sort((a,b)=>a.sort_order-b.sort_order);
+  }
+ }
+}
+
 const statusText={new:"جديد",followup:"متابعة",interested:"مهتم",contracted:"تم التعاقد",not_interested:"غير مهتم"};
 function badge(s){
  const sf=fields.find(f=>f.field_key==="status");

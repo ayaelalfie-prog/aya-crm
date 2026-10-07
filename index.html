@@ -61,6 +61,17 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 })();
 </script>
 <script>
+(async function initCRM(){
+  try {
+    if(!window.supabase){
+      await new Promise((resolve,reject)=>{
+        const s=document.createElement("script");
+        s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        s.onload=resolve;
+        s.onerror=()=>reject(new Error("Unable to load Supabase"));
+        document.head.appendChild(s);
+      });
+    }
 window.addEventListener("error",e=>{const m=document.getElementById("authMsg");if(m)m.textContent="حصل خطأ في تشغيل الصفحة: "+(e.message||"خطأ غير معروف")});
 const SUPABASE_URL="https://flnbcyhgmhvoctibhdqz.supabase.co";
 const SUPABASE_KEY="sb_publishable_4oUbQU3Lq7RfGdRADTjXhQ_Cj61_FRr";
@@ -386,4 +397,11 @@ $("backupFile").onchange=async e=>{const file=e.target.files?.[0];if(!file)retur
 
 function notifySoon(){if(!("Notification"in window)||Notification.permission==="granted")return;Notification.requestPermission().catch(()=>{})}
 sb.auth.onAuthStateChange((_e,s)=>start(s));sb.auth.getSession().then(({data})=>start(data.session));
+
+  } catch(initError) {
+    console.error(initError);
+    const m=document.getElementById("authMsg");
+    if(m) m.textContent="CRM initialization error: "+(initError?.message||"Unknown error");
+  }
+})();
 </script></body></html>

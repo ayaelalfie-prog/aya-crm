@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Aya CRM</title>
@@ -16,46 +16,46 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 @media(max-width:850px){.app{display:block}.side{width:100%;height:auto;position:static;border-left:0;border-bottom:1px solid var(--border);padding:14px}.nav{display:flex;overflow:auto;gap:6px}.nav button{white-space:nowrap;width:auto;margin:0}.logout{display:none}.main{padding:16px}.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
 .wa-link{color:#128c7e;text-decoration:none;font-weight:700}.wa-link:hover{text-decoration:underline}</style></head>
 <body>
-<div id="auth" class="auth"><div class="auth-card"><div class="logo">Aya CRM</div><div class="sub">إدارة عملائك ومواعيد المتابعة من أي جهاز</div>
-<div id="authForm"><div class="field"><label>الإيميل</label><input id="email" type="email" placeholder="name@example.com"></div><div class="field"><label>كلمة المرور</label><input id="password" type="password" placeholder="••••••••"></div><button id="loginBtn" class="primary" style="width:100%">دخول</button><button id="signupBtn" class="secondary" style="width:100%;margin-top:8px">إنشاء حساب جديد</button><p id="authMsg" class="muted"></p></div></div></div>
-<div id="app" class="app hidden"><aside class="side"><div class="brand">Aya CRM</div><div class="nav"><button data-page="dashboard" class="active">🏠 الرئيسية</button><button data-page="clients" onclick="showPage('clients')">👥 العملاء</button><button data-page="followups" onclick="showPage('followups')">⏰ المتابعات</button><button data-page="settings" onclick="showPage('settings')">⚙️ الخانات</button><button data-page="backups" onclick="showPage('backups')">💾 النسخ الاحتياطية</button></div><button id="logout" class="logout">تسجيل الخروج</button></aside>
-<main class="main"><div class="top"><div><h1 id="pageTitle">الرئيسية</h1><div class="muted">متابعة العملاء العقاريين بسهولة</div></div><button id="addBtn" class="primary">+ إضافة عميل</button></div>
-<section id="dashboard" class="page"><div class="cards"><div class="card"><div class="muted">إجمالي العملاء</div><div id="mTotal" class="metric">0</div></div><div class="card"><div class="muted">متابعات اليوم</div><div id="mToday" class="metric">0</div></div><div class="card"><div class="muted">متابعات متأخرة</div><div id="mLate" class="metric">0</div></div><div class="card"><div class="muted">عملاء مهتمون</div><div id="mInterested" class="metric">0</div></div></div>
-<div class="grid"><div class="section"><h2>أقرب المتابعات</h2><div id="dashFollowups"></div></div><div class="section"><h2>آخر العملاء</h2><div id="dashClients"></div></div></div></section>
-<section id="clients" class="page hidden"><div class="section"><div class="toolbar"><input id="search" placeholder="ابحث بالاسم أو الرقم أو المشروع"><button class="secondary" id="addBtn2">+ عميل جديد</button></div><div class="table-wrap"><table class="table"><thead><tr><th>العميل</th><th>الهاتف</th><th>المشروع</th><th>الحالة</th><th>إجراءات</th></tr></thead><tbody id="clientsBody"></tbody></table></div></div></section>
-<section id="followups" class="page hidden"><div class="section"><div class="toolbar"><select id="filterFollow"><option value="all">كل المتابعات</option><option value="open">غير مكتملة</option><option value="done">مكتملة</option></select></div><div id="followupsList"></div></div></section>
-<section id="settings" class="page hidden"><div class="section"><h2>تخصيص خانات العملاء</h2><div class="settings-note">غيّري أسماء الخانات الأساسية أو أضيفي خانات جديدة، وستظهر تلقائيًا عند إضافة أو تعديل العميل.</div><div id="fieldsList"></div><button id="saveFields" class="primary" style="margin-top:15px">حفظ أسماء الخانات</button><button id="addFieldBtn" class="secondary" style="margin-top:15px;margin-right:8px">+ إضافة خانة جديدة</button></div></section>
-<section id="backups" class="page hidden"><div class="section"><h2>💾 النسخ الاحتياطية</h2><div class="settings-note">يتم حفظ نسخة من العملاء والمتابعات والخانات المخصصة داخل قاعدة البيانات. يمكنك إنشاء نسخة الآن أو تنزيلها كملف، ثم استرجاع أي نسخة لاحقًا.</div><div class="toolbar"><button id="createBackup" class="primary">+ إنشاء نسخة احتياطية الآن</button><button id="downloadLatest" class="secondary">⬇️ تنزيل أحدث نسخة</button><input id="backupFile" type="file" accept=".json,application/json" style="max-width:260px"></div><div id="backupMsg" class="muted" style="margin:10px 0"></div><div class="table-wrap"><table class="table"><thead><tr><th>التاريخ</th><th>اسم النسخة</th><th>الحجم</th><th>إجراءات</th></tr></thead><tbody id="backupsBody"></tbody></table></div></div></section>
+<div id="auth" class="auth"><div class="auth-card"><div class="logo">Aya CRM</div><div class="sub">Manage your clients and follow-up appointments from any device</div>
+<div id="authForm"><div class="field"><label>الإيميل</label><input id="email" type="email" placeholder="name@example.com"></div><div class="field"><label>Password</label><input id="password" type="password" placeholder="••••••••"></div><button id="loginBtn" class="primary" style="width:100%">Login</button><button id="signupBtn" class="secondary" style="width:100%;margin-top:8px">Create New Account</button><p id="authMsg" class="muted"></p></div></div></div>
+<div id="app" class="app hidden"><aside class="side"><div class="brand">Aya CRM</div><div class="nav"><button data-page="dashboard" class="active">🏠 Dashboard</button><button data-page="clients" onclick="showPage('clients')">👥 Clients</button><button data-page="followups" onclick="showPage('followups')">⏰ Follow-ups</button><button data-page="settings" onclick="showPage('settings')">⚙️ Fields</button><button data-page="backups" onclick="showPage('backups')">💾 Backups</button></div><button id="logout" class="logout">Logout</button></aside>
+<main class="main"><div class="top"><div><h1 id="pageTitle">Dashboard</h1><div class="muted">Follow-up Clients العقاريين بسهولة</div></div><button id="addBtn" class="primary">+ Add Client</button></div>
+<section id="dashboard" class="page"><div class="cards"><div class="card"><div class="muted">إجمالي Clients</div><div id="mTotal" class="metric">0</div></div><div class="card"><div class="muted">Today’s Follow-ups</div><div id="mToday" class="metric">0</div></div><div class="card"><div class="muted">متابعات Overdueة</div><div id="mLate" class="metric">0</div></div><div class="card"><div class="muted">عملاء Interestedون</div><div id="mInterested" class="metric">0</div></div></div>
+<div class="grid"><div class="section"><h2>أقرب Follow-ups</h2><div id="dashFollowups"></div></div><div class="section"><h2>آخر Clients</h2><div id="dashClients"></div></div></div></section>
+<section id="clients" class="page hidden"><div class="section"><div class="toolbar"><input id="search" placeholder="اSearch بالاسم أو الNumber أو Project"><button class="secondary" id="addBtn2">+ عميل New</button></div><div class="table-wrap"><table class="table"><thead><tr><th>Client</th><th>Phone</th><th>Project</th><th>Status</th><th>Actions</th></tr></thead><tbody id="clientsBody"></tbody></table></div></div></section>
+<section id="followups" class="page hidden"><div class="section"><div class="toolbar"><select id="filterFollow"><option value="all">كل Follow-ups</option><option value="open">غير Completedة</option><option value="done">Completedة</option></select></div><div id="followupsList"></div></div></section>
+<section id="settings" class="page hidden"><div class="section"><h2>تخصيص خانات Clients</h2><div class="settings-note">غيّري أسماء Fields الSystem أو أضيفي خانات Newة، وستظهر تلقائيًا عند إضافة أو Edit Client.</div><div id="fieldsList"></div><button id="saveFields" class="primary" style="margin-top:15px">Save أسماء Fields</button><button id="addFieldBtn" class="secondary" style="margin-top:15px;margin-right:8px">+ Add New Field</button></div></section>
+<section id="backups" class="page hidden"><div class="section"><h2>💾 Backups</h2><div class="settings-note">يتم Save نسخة من Clients وFollow-ups وFields الCustom داخل قاعدة البيانات. يمكنك إنشاء نسخة الآن أو Downloadها كملف، ثم استرجاع أي نسخة لاحقًا.</div><div class="toolbar"><button id="createBackup" class="primary">+ إنشاء Backup الآن</button><button id="downloadLatest" class="secondary">⬇️ Download أحدث نسخة</button><input id="backupFile" type="file" accept=".json,application/json" style="max-width:260px"></div><div id="backupMsg" class="muted" style="margin:10px 0"></div><div class="table-wrap"><table class="table"><thead><tr><th>الDate</th><th>اسم النسخة</th><th>الحجم</th><th>Actions</th></tr></thead><tbody id="backupsBody"></tbody></table></div></div></section>
 </main></div>
-<div id="modal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h2 id="modalTitle">إضافة عميل</h2><button class="x" onclick="closeModal()">×</button></div>
-<form id="clientForm"><input type="hidden" id="clientId"><div class="form-grid"><div class="field"><label>اسم العميل *</label><input id="cName" required></div><div class="field"><label>رقم الهاتف</label><input id="cPhone"></div><div class="field"><label>المشروع</label><input id="cProject" placeholder="مثال: النرجس الجديدة"></div><div class="field"><label>الميزانية</label><input id="cBudget" type="number"></div><div class="field"><label>الحالة</label><select id="cStatus"><option value="new">جديد</option><option value="followup">متابعة</option><option value="interested">مهتم</option><option value="contracted">تم التعاقد</option><option value="not_interested">غير مهتم</option></select></div><div class="field"><label>موعد المتابعة</label><input id="fDate" type="datetime-local"></div><div class="field full"><label id="labelNotes">ملاحظات</label><textarea id="cNotes"></textarea></div><div class="field full"><label>تعليقات العميل</label><div id="commentsList" style="display:grid;gap:8px;margin-bottom:10px"></div><div style="display:flex;gap:8px"><input id="newComment" placeholder="اكتبي تعليق جديد على العميل"><button type="button" id="addCommentBtn" class="secondary">+ إضافة تعليق</button></div></div><div id="customFieldsContainer" class="full"></div><div class="field full"><label>ملاحظة المتابعة</label><input id="fNote" placeholder="مثال: الاتصال لإرسال الأسعار"></div></div><button class="primary" type="submit" style="width:100%">حفظ</button></form></div></div>
-<div id="fieldModal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h2>إضافة خانة جديدة</h2><button class="x" onclick="closeFieldModal()">×</button></div><div class="field"><label>اسم الخانة</label><input id="newFieldLabel" placeholder="مثال: مصدر العميل"></div><div class="field"><label>نوع الخانة</label><select id="newFieldType"><option value="text">نص</option><option value="textarea">نص طويل</option><option value="number">رقم</option><option value="date">تاريخ</option><option value="select">اختيارات</option></select></div><div id="newFieldOptionsWrap" class="field" style="display:none"><label>الاختيارات</label><input id="newFieldOptions" placeholder="فيسبوك, واتساب, إحالة"></div><button id="createField" class="primary" style="width:100%">إضافة الخانة</button></div></div>
+<div id="modal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h2 id="modalTitle">Add Client</h2><button class="x" onclick="closeModal()">×</button></div>
+<form id="clientForm"><input type="hidden" id="clientId"><div class="form-grid"><div class="field"><label>Client Name *</label><input id="cName" required></div><div class="field"><label>Phone</label><input id="cPhone"></div><div class="field"><label>Project</label><input id="cProject" placeholder="مثال: النرجس الNewة"></div><div class="field"><label>Budget</label><input id="cBudget" type="number"></div><div class="field"><label>Status</label><select id="cStatus"><option value="new">New</option><option value="followup">Follow-up</option><option value="interested">Interested</option><option value="contracted">Contracted</option><option value="not_interested">غير Interested</option></select></div><div class="field"><label>Follow-up Date</label><input id="fDate" type="datetime-local"></div><div class="field full"><label id="labelNotes">Notes</label><textarea id="cNotes"></textarea></div><div class="field full"><label>تعليقات Client</label><div id="commentsList" style="display:grid;gap:8px;margin-bottom:10px"></div><div style="display:flex;gap:8px"><input id="newComment" placeholder="اكتبي تعليق New على Client"><button type="button" id="addCommentBtn" class="secondary">+ + Add Comment</button></div></div><div id="customFieldsContainer" class="full"></div><div class="field full"><label>Follow-up Note</label><input id="fNote" placeholder="مثال: الاتصال لإرسال الأسعار"></div></div><button class="primary" type="submit" style="width:100%">Save</button></form></div></div>
+<div id="fieldModal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h2>Add Field Newة</h2><button class="x" onclick="closeFieldModal()">×</button></div><div class="field"><label>Field Name</label><input id="newFieldLabel" placeholder="مثال: مصدر Client"></div><div class="field"><label>Field Type</label><select id="newFieldType"><option value="text">Text</option><option value="textarea">Text طويل</option><option value="number">Number</option><option value="date">Date</option><option value="select">Options</option></select></div><div id="newFieldOptionsWrap" class="field" style="display:none"><label>الOptions</label><input id="newFieldOptions" placeholder="فيسبوك, WhatsApp, إحالة"></div><button id="createField" class="primary" style="width:100%">إضافة الخانة</button></div></div>
 <script>
 (function(){
  const btn=document.getElementById("loginBtn"), msg=document.getElementById("authMsg");
  if(!btn) return;
  window.loginNow=async function(){
-  btn.disabled=true; btn.textContent="جاري الدخول...";
+  btn.disabled=true; btn.textContent="جاري الLogin...";
   try{
    const email=(document.getElementById("email")||{}).value?.trim()||"";
    const password=(document.getElementById("password")||{}).value||"";
-   if(!email||!password){msg.textContent="اكتبي الإيميل وكلمة المرور أولًا."; return;}
+   if(!email||!password){msg.textContent="اكتبي الإيميل وPassword أولًا."; return;}
    if(!window.supabase){
-    msg.textContent="جاري تحميل خدمة الدخول...";
+    msg.textContent="جاري تحميل خدمة الLogin...";
     await new Promise((resolve,reject)=>{
       const s=document.createElement("script");
       s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-      s.onload=resolve; s.onerror=()=>reject(new Error("تعذر تحميل خدمة الدخول"));
+      s.onload=resolve; s.onerror=()=>reject(new Error("تعذر تحميل خدمة الLogin"));
       document.head.appendChild(s);
     });
    }
    const client=window.supabase.createClient("https://flnbcyhgmhvoctibhdqz.supabase.co","sb_publishable_4oUbQU3Lq7RfGdRADTjXhQ_Cj61_FRr");
    const r=await client.auth.signInWithPassword({email,password});
-   if(r.error){msg.textContent="لم يتم الدخول: "+(r.error.message||"بيانات الدخول غير صحيحة");return;}
-   msg.textContent="تم الدخول بنجاح، جاري فتح النظام...";
+   if(r.error){msg.textContent="لم يتم الLogin: "+(r.error.message||"بيانات الLogin غير صحيحة");return;}
+   msg.textContent="تم الLogin بنجاح، جاري Open النظام...";
    await window.start(r.data.session);
   }catch(e){console.error(e); msg.textContent="حصل خطأ: "+(e?.message||"خطأ غير معروف");}
-  finally{btn.disabled=false;btn.textContent="دخول";}
+  finally{btn.disabled=false;btn.textContent="Login";}
  };
  btn.onclick=window.loginNow;
 })();
@@ -71,35 +71,35 @@ const earlyLoginBtn=$("loginBtn"), earlyAuthMsg=$("authMsg");
 if(earlyLoginBtn){
  earlyLoginBtn.type="button";
  earlyLoginBtn.onclick=async()=>{
-  earlyLoginBtn.disabled=true; earlyLoginBtn.textContent="جاري الدخول...";
+  earlyLoginBtn.disabled=true; earlyLoginBtn.textContent="جاري الLogin...";
   try{
    const email=$("email").value.trim(), password=$("password").value;
-   if(!email||!password){earlyAuthMsg.textContent="اكتبي الإيميل وكلمة المرور أولًا.";return}
+   if(!email||!password){earlyAuthMsg.textContent="اكتبي الإيميل وPassword أولًا.";return}
    const result=await sb.auth.signInWithPassword({email,password});
-   if(result.error){earlyAuthMsg.textContent=result.error.message||"بيانات الدخول غير صحيحة.";return}
-   earlyAuthMsg.textContent="تم الدخول بنجاح...";
+   if(result.error){earlyAuthMsg.textContent=result.error.message||"بيانات الLogin غير صحيحة.";return}
+   earlyAuthMsg.textContent="تم الLogin بنجاح...";
    await start(result.data.session);
-  }catch(e){console.error(e);earlyAuthMsg.textContent="حصل خطأ أثناء الدخول: "+(e.message||"خطأ غير معروف")}
-  finally{earlyLoginBtn.disabled=false;earlyLoginBtn.textContent="دخول"}
+  }catch(e){console.error(e);earlyAuthMsg.textContent="حصل خطأ أثناء الLogin: "+(e.message||"خطأ غير معروف")}
+  finally{earlyLoginBtn.disabled=false;earlyLoginBtn.textContent="Login"}
  };
 }
 
 async function ensureFields(){
  const defaults=[
-  ["name","اسم العميل","text",true,1,[]],
-  ["phone","رقم الهاتف","text",true,2,[]],
-  ["project","المشروع","text",true,3,[]],
-  ["budget","الميزانية","number",true,4,[]],
-  ["status","الحالة","select",true,5,["جديد","متابعة","مهتم","تم التعاقد","غير مهتم"]],
-  ["notes","ملاحظات","textarea",true,6,[]]
+  ["name","Client Name","text",true,1,[]],
+  ["phone","Phone","text",true,2,[]],
+  ["project","Project","text",true,3,[]],
+  ["budget","Budget","number",true,4,[]],
+  ["status","Status","select",true,5,["New","Follow-up","Interested","Contracted","غير Interested"]],
+  ["notes","Notes","textarea",true,6,[]]
  ];
  const r=await sb.from("crm_fields").select("*").eq("user_id",user.id).order("sort_order",{ascending:true});
- if(r.error)throw new Error("خطأ في تحميل الخانات: "+r.error.message);
+ if(r.error)throw new Error("خطأ في تحميل Fields: "+r.error.message);
  const existing=r.data||[];
  if(!existing.length){
   const rows=defaults.map(x=>({user_id:user.id,field_key:x[0],label:x[1],field_type:x[2],is_system:x[3],sort_order:x[4],options:x[5],is_active:true}));
   const ins=await sb.from("crm_fields").insert(rows).select("*");
-  if(ins.error)throw new Error("خطأ في إنشاء الخانات الأساسية: "+ins.error.message);
+  if(ins.error)throw new Error("خطأ في إنشاء Fields الSystem: "+ins.error.message);
   fields=ins.data||[];
  }else{
   fields=existing.filter(x=>x.is_active!==false);
@@ -107,14 +107,14 @@ async function ensureFields(){
   const missing=defaults.filter(x=>!byKey.has(x[0])).map(x=>({user_id:user.id,field_key:x[0],label:x[1],field_type:x[2],is_system:x[3],sort_order:x[4],options:x[5],is_active:true}));
   if(missing.length){
    const ins=await sb.from("crm_fields").insert(missing).select("*");
-   if(ins.error)throw new Error("خطأ في استكمال الخانات: "+ins.error.message);
+   if(ins.error)throw new Error("خطأ في استكمال Fields: "+ins.error.message);
    fields=[...fields,...(ins.data||[])].sort((a,b)=>a.sort_order-b.sort_order);
   }
  }
 }
 
 window.ensureFields=ensureFields;
-const statusText={new:"جديد",followup:"متابعة",interested:"مهتم",contracted:"تم التعاقد",not_interested:"غير مهتم"};
+const statusText={new:"New",followup:"Follow-up",interested:"Interested",contracted:"Contracted",not_interested:"غير Interested"};
 function badge(s){
  const sf=fields.find(f=>f.field_key==="status");
  const opt=(sf?.options||[]).find(o=>typeof o==="object"?o.value===s:o===s);
@@ -125,13 +125,13 @@ async function load(){
  if(!user?.id) throw new Error("لم يتم التعرف على الحساب");
  await ensureFields();
  const c=await sb.from("clients").select("*").eq("user_id",user.id).order("created_at",{ascending:false});
- if(c.error) throw new Error("خطأ في تحميل العملاء: "+c.error.message);
+ if(c.error) throw new Error("خطأ في تحميل Clients: "+c.error.message);
  clients=c.data||[];
  const cm=await sb.from("client_comments").select("*").eq("user_id",user.id).order("created_at",{ascending:false});
- if(cm.error){console.warn("تعذر تحميل تعليقات العملاء:",cm.error.message);clientComments=[]}
+ if(cm.error){console.warn("تعذر تحميل تعليقات Clients:",cm.error.message);clientComments=[]}
  else clientComments=cm.data||[];
  const f=await sb.from("followups").select("*").eq("user_id",user.id).order("followup_at",{ascending:true});
- if(f.error){console.warn("تعذر تحميل المتابعات:",f.error.message);followups=[]}
+ if(f.error){console.warn("تعذر تحميل Follow-ups:",f.error.message);followups=[]}
  else{
   followups=f.data||[];
   if(followups.length){
@@ -147,13 +147,13 @@ function fieldLabel(key,fallback){return fields.find(f=>f.field_key===key)?.labe
 function renderFields(){
  const box=$("fieldsList"); if(!box)return;
  box.innerHTML=fields.map(f=>{
-  const type={text:"نص",textarea:"نص طويل",number:"رقم",date:"تاريخ",select:"اختيارات"}[f.field_type]||f.field_type;
+  const type={text:"Text",textarea:"Text طويل",number:"Number",date:"Date",select:"Options"}[f.field_type]||f.field_type;
   const options=f.field_type==="select" ? ((f.options||[]).map(o=>typeof o==="object"?o.label:o).join("، ")) : "";
-  const optionsEditor=f.field_type==="select" ? `<div style="grid-column:1/-1;margin-top:6px"><div class="muted" style="margin-bottom:5px">اختيارات ${esc(f.label)}</div><input data-field-options="${esc(f.id)}" value="${esc(options)}" placeholder="مثال: جديد، متابعة، مهتم، تم التعاقد"></div>` : "";
-  const deleteBtn=f.is_system?"":`<button class="danger" onclick="deleteField('${f.id}')">حذف</button>`;
-  return `<div class="field-row" style="grid-template-columns:1.3fr 1fr auto auto;flex-wrap:wrap"><input data-field-label="${esc(f.id)}" value="${esc(f.label)}"><span class="type-pill">${type}</span><span class="muted">${f.is_system?"أساسية":"مخصصة"}</span>${f.is_system?"<span></span>":deleteBtn}${optionsEditor}</div>`;
+  const optionsEditor=f.field_type==="select" ? `<div style="grid-column:1/-1;margin-top:6px"><div class="muted" style="margin-bottom:5px">Options ${esc(f.label)}</div><input data-field-options="${esc(f.id)}" value="${esc(options)}" placeholder="مثال: New، Follow-up، Interested، Contracted"></div>` : "";
+  const deleteBtn=f.is_system?"":`<button class="danger" onclick="deleteField('${f.id}')">Delete</button>`;
+  return `<div class="field-row" style="grid-template-columns:1.3fr 1fr auto auto;flex-wrap:wrap"><input data-field-label="${esc(f.id)}" value="${esc(f.label)}"><span class="type-pill">${type}</span><span class="muted">${f.is_system?"System":"Custom"}</span>${f.is_system?"<span></span>":deleteBtn}${optionsEditor}</div>`;
  }).join("");
- $("clients").querySelector("thead").innerHTML='<tr><th>'+fieldLabel("name","العميل")+'</th><th>'+fieldLabel("phone","الهاتف")+'</th><th>'+fieldLabel("project","المشروع")+'</th><th>'+fieldLabel("status","الحالة")+'</th><th>واتساب</th><th>إجراءات</th></tr>';
+ $("clients").querySelector("thead").innerHTML='<tr><th>'+fieldLabel("name","Client")+'</th><th>'+fieldLabel("phone","Phone")+'</th><th>'+fieldLabel("project","Project")+'</th><th>'+fieldLabel("status","Status")+'</th><th>WhatsApp</th><th>Actions</th></tr>';
 }
 function render(){
  const now=new Date(), start=new Date(); start.setHours(0,0,0,0); const end=new Date(start); end.setDate(end.getDate()+1);
@@ -161,11 +161,11 @@ function render(){
  $("mLate").textContent=followups.filter(x=>!x.completed&&new Date(x.followup_at)<now).length;
  $("mInterested").textContent=clients.filter(x=>x.status==="interested").length;
  $("dashClients").innerHTML=clients.slice(0,6).map(c=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+esc(c.name)+'</b><div class="muted">'+esc(c.project||"—")+' · '+badge(c.status)+'</div></div>').join("")||'<div class="empty">لا يوجد عملاء بعد</div>';
- $("dashFollowups").innerHTML=followups.filter(x=>!x.completed).slice(0,6).map(f=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+esc(f.clients?.name||"عميل")+'</b><div class="muted">'+fmt(f.followup_at)+(new Date(f.followup_at)<now?' · <span style="color:#d34b4b">متأخرة</span>':"")+'</div></div>').join("")||'<div class="empty">لا توجد متابعات</div>';
+ $("dashFollowups").innerHTML=followups.filter(x=>!x.completed).slice(0,6).map(f=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+esc(f.clients?.name||"عميل")+'</b><div class="muted">'+fmt(f.followup_at)+(new Date(f.followup_at)<now?' · <span style="color:#d34b4b">Overdueة</span>':"")+'</div></div>').join("")||'<div class="empty">No follow-ups</div>';
  const q=($("search")?.value||"").toLowerCase(); const filtered=clients.filter(c=>(c.name+" "+(c.phone||"")+" "+(c.project||"")).toLowerCase().includes(q));
- $("clientsBody").innerHTML=filtered.map(c=>'<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.phone||"—")+'</td><td>'+esc(c.project||"—")+'</td><td>'+badge(c.status)+'</td><td>'+wa(c.phone)+'</td><td><div class="row-actions"><button class="secondary" onclick="editClient(\''+c.id+'\')">تعديل</button><button class="danger" onclick="deleteClient(\''+c.id+'\')">حذف</button></div></td></tr>').join("")||'<tr><td colspan="6"><div class="empty">لا يوجد عملاء</div></td></tr>';
+ $("clientsBody").innerHTML=filtered.map(c=>'<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.phone||"—")+'</td><td>'+esc(c.project||"—")+'</td><td>'+badge(c.status)+'</td><td>'+wa(c.phone)+'</td><td><div class="row-actions"><button class="secondary" onclick="editClient(\''+c.id+'\')">Edit</button><button class="danger" onclick="deleteClient(\''+c.id+'\')">Delete</button></div></td></tr>').join("")||'<tr><td colspan="6"><div class="empty">لا يوجد عملاء</div></td></tr>';
  const ff=$("filterFollow")?.value||"all"; const fl=followups.filter(x=>ff==="all"||ff==="open"&&!x.completed||ff==="done"&&x.completed);
- $("followupsList").innerHTML=fl.map(f=>'<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>'+esc(f.clients?.name||"عميل")+'</b><div class="muted">'+wa(f.clients?.phone)+'</div></div><div class="muted">'+fmt(f.followup_at)+'</div></div><p>'+esc(f.note||"بدون ملاحظة")+'</p><button class="'+(f.completed?"secondary":"primary")+'" onclick="toggleFollow(\''+f.id+'\','+(f.completed?"false":"true")+')">'+(f.completed?"إلغاء الإكمال":"تمت المتابعة")+'</button></div>').join("")||'<div class="empty">لا توجد متابعات</div>';
+ $("followupsList").innerHTML=fl.map(f=>'<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>'+esc(f.clients?.name||"عميل")+'</b><div class="muted">'+wa(f.clients?.phone)+'</div></div><div class="muted">'+fmt(f.followup_at)+'</div></div><p>'+esc(f.note||"بدون Note")+'</p><button class="'+(f.completed?"secondary":"primary")+'" onclick="toggleFollow(\''+f.id+'\','+(f.completed?"false":"true")+')">'+(f.completed?"Cancel الإكمال":"تمت الFollow-up")+'</button></div>').join("")||'<div class="empty">No follow-ups</div>';
 }
 function fmt(v){
  if(!v)return "—";
@@ -175,28 +175,28 @@ function fmt(v){
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
-function wa(phone){let p=String(phone||"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/\D/g,"");if(p.startsWith("0"))p="20"+p.slice(1);if(!p)return "";return '<a class="wa-link" href="https://wa.me/'+p+'" target="_blank" rel="noopener" title="فتح واتساب" aria-label="فتح واتساب" style="display:inline-flex;vertical-align:middle;margin-right:6px"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path fill="#25D366" d="M16 3C8.82 3 3 8.82 3 16c0 2.3.6 4.45 1.74 6.35L3.1 29l6.8-1.59A12.94 12.94 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3Zm0 23.7c-2.05 0-4.06-.55-5.8-1.6l-.42-.25-4.04.95.96-3.94-.27-.43A10.72 10.72 0 1 1 16 26.7Zm5.87-7.99c-.32-.16-1.88-.93-2.17-1.04-.29-.11-.5-.16-.71.16-.21.32-.82 1.04-1.01 1.25-.18.21-.37.24-.69.08-.32-.16-1.35-.5-2.58-1.59-.95-.84-1.59-1.87-1.78-2.18-.18-.32-.02-.49.14-.65.14-.14.32-.37.47-.55.16-.18.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.71-1.71-.98-2.34-.26-.61-.52-.53-.71-.54h-.61c-.21 0-.55.08-.84.4-.29.32-1.1 1.07-1.1 2.61s1.13 3.03 1.29 3.24c.16.21 2.22 3.39 5.38 4.75.75.32 1.34.51 1.8.65.76.24 1.45.21 1.99.13.61-.09 1.88-.77 2.14-1.51.26-.74.26-1.38.18-1.51-.08-.13-.29-.21-.61-.37Z"/></svg></a>'}
+function wa(phone){let p=String(phone||"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/\D/g,"");if(p.startsWith("0"))p="20"+p.slice(1);if(!p)return "";return '<a class="wa-link" href="https://wa.me/'+p+'" target="_blank" rel="noopener" title="Open WhatsApp" aria-label="Open WhatsApp" style="display:inline-flex;vertical-align:middle;margin-right:6px"><svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path fill="#25D366" d="M16 3C8.82 3 3 8.82 3 16c0 2.3.6 4.45 1.74 6.35L3.1 29l6.8-1.59A12.94 12.94 0 0 0 16 29c7.18 0 13-5.82 13-13S23.18 3 16 3Zm0 23.7c-2.05 0-4.06-.55-5.8-1.6l-.42-.25-4.04.95.96-3.94-.27-.43A10.72 10.72 0 1 1 16 26.7Zm5.87-7.99c-.32-.16-1.88-.93-2.17-1.04-.29-.11-.5-.16-.71.16-.21.32-.82 1.04-1.01 1.25-.18.21-.37.24-.69.08-.32-.16-1.35-.5-2.58-1.59-.95-.84-1.59-1.87-1.78-2.18-.18-.32-.02-.49.14-.65.14-.14.32-.37.47-.55.16-.18.21-.32.32-.53.11-.21.05-.4-.03-.56-.08-.16-.71-1.71-.98-2.34-.26-.61-.52-.53-.71-.54h-.61c-.21 0-.55.08-.84.4-.29.32-1.1 1.07-1.1 2.61s1.13 3.03 1.29 3.24c.16.21 2.22 3.39 5.38 4.75.75.32 1.34.51 1.8.65.76.24 1.45.21 1.99.13.61-.09 1.88-.77 2.14-1.51.26-.74.26-1.38.18-1.51-.08-.13-.29-.21-.61-.37Z"/></svg></a>'}
 async function loadClientComments(clientId){
  const box=$("commentsList"); if(!box)return;
- if(!clientId){box.innerHTML='<div class="muted">احفظي العميل أولًا، وبعدها تقدري تضيفي تعليقات متعددة.</div>';return;}
+ if(!clientId){box.innerHTML='<div class="muted">اSaveي Client أولًا، وبعدها تقدري تضيفي تعليقات متعددة.</div>';return;}
  const rows=clientComments.filter(x=>x.client_id===clientId).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
- box.innerHTML=rows.map(x=>`<div class="card" style="padding:10px"><div style="font-size:12px;color:#718096">${fmt(x.created_at)}</div><div style="margin-top:4px">${esc(x.comment)}</div><button type="button" class="danger" style="margin-top:7px" onclick="deleteComment('${x.id}')">حذف</button></div>`).join('')||'<div class="muted">لا توجد تعليقات بعد.</div>';
+ box.innerHTML=rows.map(x=>`<div class="card" style="padding:10px"><div style="font-size:12px;color:#718096">${fmt(x.created_at)}</div><div style="margin-top:4px">${esc(x.comment)}</div><button type="button" class="danger" style="margin-top:7px" onclick="deleteComment('${x.id}')">Delete</button></div>`).join('')||'<div class="muted">No comments yet.</div>';
 }
-window.deleteComment=async id=>{if(!confirm("حذف التعليق؟"))return;const r=await sb.from("client_comments").delete().eq("id",id).eq("user_id",user.id);if(r.error)return alert("تعذر حذف التعليق");clientComments=clientComments.filter(x=>x.id!==id);await loadClientComments($("clientId").value)};
-$("addCommentBtn").onclick=async()=>{const clientId=$("clientId").value, input=$("newComment"), comment=input.value.trim();if(!clientId)return alert("احفظي العميل أولًا، وبعدها أضيفي التعليق.");if(!comment)return;const r=await sb.from("client_comments").insert({user_id:user.id,client_id:clientId,comment}).select().single();if(r.error)return alert("تعذر إضافة التعليق");clientComments.unshift(r.data);input.value="";await loadClientComments(clientId)};
+window.deleteComment=async id=>{if(!confirm("Delete التعليق؟"))return;const r=await sb.from("client_comments").delete().eq("id",id).eq("user_id",user.id);if(r.error)return alert("تعذر Delete التعليق");clientComments=clientComments.filter(x=>x.id!==id);await loadClientComments($("clientId").value)};
+$("addCommentBtn").onclick=async()=>{const clientId=$("clientId").value, input=$("newComment"), comment=input.value.trim();if(!clientId)return alert("اSaveي Client أولًا، وبعدها أضيفي التعليق.");if(!comment)return;const r=await sb.from("client_comments").insert({user_id:user.id,client_id:clientId,comment}).select().single();if(r.error)return alert("تعذر إضافة التعليق");clientComments.unshift(r.data);input.value="";await loadClientComments(clientId)};
 
 function renderStatusOptions(selected){
  const sel=$("cStatus"); if(!sel)return;
  const sf=fields.find(f=>f.field_key==="status");
- const raw=sf?.options?.length?sf.options:["جديد","متابعة","مهتم","تم التعاقد","غير مهتم"];
- const known={جديد:"new",متابعة:"followup",مهتم:"interested","تم التعاقد":"contracted","غير مهتم":"not_interested"};
+ const raw=sf?.options?.length?sf.options:["New","Follow-up","Interested","Contracted","غير Interested"];
+ const known={New:"new",Follow-up:"followup",Interested:"interested","Contracted":"contracted","غير Interested":"not_interested"};
  const opts=raw.map(o=>typeof o==="object"?o:{value:known[o]||o,label:o});
  sel.innerHTML=opts.map(o=>'<option value="'+esc(o.value)+'">'+esc(o.label)+'</option>').join("");
  if(selected && opts.some(o=>String(o.value)===String(selected)))sel.value=selected;
 }
 function openModal(c=null){
  $("modal").classList.remove("hidden");
- $("modalTitle").textContent=c?"تعديل العميل":"إضافة عميل";
+ $("modalTitle").textContent=c?"Edit Client":"Add Client";
  $("clientId").value=c?.id||"";
  $("cName").value=c?.name||"";
  $("cPhone").value=c?.phone||"";
@@ -207,12 +207,12 @@ function openModal(c=null){
  $("cNotes").value=c?.notes||"";
  $("fDate").value="";
  $("fNote").value="";
- $("cName").previousElementSibling.textContent=fieldLabel("name","اسم العميل");
- $("cPhone").previousElementSibling.textContent=fieldLabel("phone","رقم الهاتف");
- $("cProject").previousElementSibling.textContent=fieldLabel("project","المشروع");
- $("cBudget").previousElementSibling.textContent=fieldLabel("budget","الميزانية");
- $("cStatus").previousElementSibling.textContent=fieldLabel("status","الحالة");
- $("labelNotes").textContent=fieldLabel("notes","ملاحظات");
+ $("cName").previousElementSibling.textContent=fieldLabel("name","Client Name");
+ $("cPhone").previousElementSibling.textContent=fieldLabel("phone","Phone");
+ $("cProject").previousElementSibling.textContent=fieldLabel("project","Project");
+ $("cBudget").previousElementSibling.textContent=fieldLabel("budget","Budget");
+ $("cStatus").previousElementSibling.textContent=fieldLabel("status","Status");
+ $("labelNotes").textContent=fieldLabel("notes","Notes");
  loadClientComments(c?.id||null); $("newComment").value="";
  const box=$("customFieldsContainer"), vals=c?.custom_fields||{};
  box.innerHTML=fields.filter(f=>!f.is_system&&f.is_active).map(f=>{
@@ -224,15 +224,15 @@ function openModal(c=null){
 function closeModal(){$("modal").classList.add("hidden")}
 window.closeModal=closeModal;
 window.editClient=id=>openModal(clients.find(c=>c.id===id));
-window.deleteClient=async id=>{if(!confirm("حذف العميل؟"))return;await sb.from("clients").delete().eq("id",id);await load()};
+window.deleteClient=async id=>{if(!confirm("Delete Client؟"))return;await sb.from("clients").delete().eq("id",id);await load()};
 window.closeFieldModal=()=>$("fieldModal").classList.add("hidden");
-window.deleteField=async id=>{if(!confirm("حذف هذه الخانة؟"))return;await sb.from("crm_fields").update({is_active:false}).eq("id",id).eq("user_id",user.id);await load()};
+window.deleteField=async id=>{if(!confirm("Delete هذه الخانة؟"))return;await sb.from("crm_fields").update({is_active:false}).eq("id",id).eq("user_id",user.id);await load()};
 $("clientForm").onsubmit=async e=>{
  e.preventDefault();
  const saveBtn=$("clientForm").querySelector('button[type="submit"]');
- if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="جاري الحفظ...";}
+ if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="جاري الSave...";}
  try{
-  if(!user?.id){throw new Error("انتهت جلسة الدخول، سجلي الدخول مرة أخرى.");}
+  if(!user?.id){throw new Error("انتهت جلسة الLogin، سجلي الLogin مرة أخرى.");}
   const id=$("clientId").value.trim();
   const custom_fields={};
   document.querySelectorAll("[data-custom-key]").forEach(el=>{custom_fields[el.dataset.customKey]=el.value;});
@@ -246,24 +246,24 @@ $("clientForm").onsubmit=async e=>{
    notes:$("cNotes").value.trim()||null,
    custom_fields
   };
-  if(!payload.name){throw new Error("اكتبي اسم العميل أولًا.");}
+  if(!payload.name){throw new Error("اكتبي Client Name أولًا.");}
   let client;
   if(id){
    const r=await sb.from("clients").update({...payload,user_id:undefined}).eq("id",id).eq("user_id",user.id).select("*").single();
-   if(r.error)throw new Error("تعذر تعديل العميل: "+r.error.message);
+   if(r.error)throw new Error("تعذر Edit Client: "+r.error.message);
    client=r.data;
   }else{
    const r=await sb.from("clients").insert(payload).select("*").single();
-   if(r.error)throw new Error("تعذر إضافة العميل: "+r.error.message);
+   if(r.error)throw new Error("تعذر إضافة Client: "+r.error.message);
    client=r.data;
   }
   const followDate=$("fDate").value;
   const followNote=$("fNote").value.trim()||null;
   if(followDate){
    const fr=await sb.from("followups").insert({user_id:user.id,client_id:client.id,followup_at:new Date(followDate).toISOString(),note:followNote,completed:false});
-   if(fr.error)throw new Error("تم حفظ العميل لكن تعذر حفظ موعد المتابعة: "+fr.error.message);
+   if(fr.error)throw new Error("تم Save Client لكن تعذر Save Follow-up Date: "+fr.error.message);
   }
-  // حدّثي القائمة فورًا من العميل المحفوظ حتى لو فشل تحميل بيانات جانبية.
+  // حدّثي القائمة فورًا من Client المحفوظ حتى لو فشل تحميل بيانات جانبية.
   if(id){
    clients=clients.map(x=>x.id===client.id?client:x);
   }else{
@@ -272,12 +272,12 @@ $("clientForm").onsubmit=async e=>{
   render();
   closeModal();
   showPage("dashboard");
-  alert(id?"تم تعديل العميل بنجاح":"تمت إضافة العميل بنجاح");
+  alert(id?"تم Edit Client بنجاح":"تمت إضافة Client بنجاح");
  }catch(err){
   console.error(err);
-  alert(err.message||"تعذر حفظ العميل");
+  alert(err.message||"تعذر Save Client");
  }finally{
-  if(saveBtn){saveBtn.disabled=false;saveBtn.textContent="حفظ";}
+  if(saveBtn){saveBtn.disabled=false;saveBtn.textContent="Save";}
  }
 };
 
@@ -285,11 +285,11 @@ $("addFieldBtn").onclick=()=>$("fieldModal").classList.remove("hidden");
 $("newFieldType").onchange=()=>{$("newFieldOptionsWrap").style.display=$("newFieldType").value==="select"?"block":"none"};
 $("createField").onclick=async()=>{
  const label=$("newFieldLabel").value.trim(), type=$("newFieldType").value;
- if(!label){alert("اكتبي اسم الخانة أولًا");return}
+ if(!label){alert("اكتبي Field Name أولًا");return}
  const options=type==="select"?$("newFieldOptions").value.split(/[,،\n]/).map(x=>x.trim()).filter(Boolean):[];
  const key="custom_"+Date.now();
  const {error}=await sb.from("crm_fields").insert({user_id:user.id,field_key:key,label,field_type:type,options,is_system:false,is_active:true,sort_order:(fields.reduce((m,x)=>Math.max(m,x.sort_order||0),0)+1)});
- if(error){alert("تعذر إضافة الخانة: "+error.message);return}
+ if(error){alert("Unable to add field: "+error.message);return}
  $("newFieldLabel").value="";$("newFieldOptions").value="";$("newFieldOptionsWrap").style.display="none";$("fieldModal").classList.add("hidden");
  await load();showPage("settings");
 };
@@ -307,14 +307,14 @@ $("saveFields").onclick=async()=>{
     data.options=labels.map(label=>{
      const old=oldByLabel.get(label);
      if(old&&typeof old==="object")return old;
-     const known={جديد:"new",متابعة:"followup",مهتم:"interested","تم التعاقد":"contracted","غير مهتم":"not_interested"};
+     const known={New:"new",Follow-up:"followup",Interested:"interested","Contracted":"contracted","غير Interested":"not_interested"};
      return {value:known[label]||("custom_"+Date.now()+"_"+Math.random().toString(36).slice(2,7)),label};
     });
    }
   }
   if(Object.keys(data).length)await sb.from("crm_fields").update(data).eq("id",f.id).eq("user_id",user.id);
  }
- await load(); renderStatusOptions(); alert("تم حفظ الخانات والاختيارات بنجاح");
+ await load(); renderStatusOptions(); alert("تم Save Fields والOptions بنجاح");
 };
 $("search").oninput=render;$("filterFollow").onchange=render;$("addBtn").onclick=()=>openModal();$("addBtn2").onclick=()=>openModal();
 window.showPage=async function(page){document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));const target=document.getElementById(page);if(target)target.classList.remove("hidden");const btn=document.querySelector(".nav button[data-page=\""+page+"\"]");if(btn)document.getElementById("pageTitle").textContent=btn.textContent.replace(/^\S+\s*/,"");if(page==="backups")await loadBackups();};
@@ -322,9 +322,9 @@ window.showPage=async function(page){document.querySelectorAll(".nav button").fo
 $("signupBtn").onclick=async()=>{
  try{
   const email=$("email").value.trim(), password=$("password").value;
-  if(!email||!password){$("authMsg").textContent="اكتبي الإيميل وكلمة المرور أولًا.";return}
+  if(!email||!password){$("authMsg").textContent="اكتبي الإيميل وPassword أولًا.";return}
   const {error}=await sb.auth.signUp({email,password});
-  $("authMsg").textContent=error?error.message:"تم إنشاء الحساب. لو ظهر تأكيد الإيميل، أكديه ثم سجّلي الدخول.";
+  $("authMsg").textContent=error?error.message:"تم إنشاء الحساب. لو ظهر تأكيد الإيميل، أكديه ثم سجّلي الLogin.";
  }catch(e){$("authMsg").textContent="حصل خطأ أثناء إنشاء الحساب."}
 };
 $("logout").onclick=()=>sb.auth.signOut();
@@ -335,10 +335,10 @@ window.start=async function start(s){
  try{await load();notifySoon()}
  catch(e){
   console.error(e);
-  const msg="تعذر تحميل بعض بيانات CRM: "+(e.message||"خطأ غير معروف");
+  const msg="Some CRM data could not be loaded: "+(e.message||"خطأ غير معروف");
   console.error(msg);
   const title=$("pageTitle");
-  if(title)title.textContent="الرئيسية";
+  if(title)title.textContent="Dashboard";
   const dash=$("dashboard");
   if(dash && !clients.length)dash.insertAdjacentHTML("afterbegin",'<div class="settings-note" style="margin-bottom:14px">'+esc(msg)+'</div>');
  }
@@ -347,19 +347,19 @@ async function getBackupSnapshot(){return {version:1,created_at:new Date().toISO
 async function loadBackups(){
  const r=await sb.from("crm_backups").select("id,created_at,label,snapshot").eq("user_id",user.id).order("created_at",{ascending:false});
  const rows=r.data||[]; const body=$("backupsBody");
- body.innerHTML=rows.map(b=>'<tr><td>'+fmt(b.created_at)+'</td><td>'+esc(b.label)+'</td><td>'+Math.round(JSON.stringify(b.snapshot).length/1024)+' KB</td><td><div class="row-actions"><button class="secondary" onclick="downloadBackup(\''+b.id+'\')">تنزيل</button><button class="primary" onclick="restoreBackup(\''+b.id+'\')">استرجاع</button><button class="danger" onclick="deleteBackup(\''+b.id+'\')">حذف</button></div></td></tr>').join("")||'<tr><td colspan="4"><div class="empty">لا توجد نسخ احتياطية بعد</div></td></tr>';
+ body.innerHTML=rows.map(b=>'<tr><td>'+fmt(b.created_at)+'</td><td>'+esc(b.label)+'</td><td>'+Math.round(JSON.stringify(b.snapshot).length/1024)+' KB</td><td><div class="row-actions"><button class="secondary" onclick="downloadBackup(\''+b.id+'\')">Download</button><button class="primary" onclick="restoreBackup(\''+b.id+'\')">استرجاع</button><button class="danger" onclick="deleteBackup(\''+b.id+'\')">Delete</button></div></td></tr>').join("")||'<tr><td colspan="4"><div class="empty">لا توجد نسخ احتياطية بعد</div></td></tr>';
  window.__backups=rows;
 }
 async function createBackup(){
  const msg=$("backupMsg"); msg.textContent="جاري إنشاء النسخة...";
  const snapshot=await getBackupSnapshot();
  const {error}=await sb.from("crm_backups").insert({user_id:user.id,label:"نسخة "+new Date().toLocaleString("ar-EG"),snapshot});
- msg.textContent=error?"تعذر إنشاء النسخة الاحتياطية.":"تم إنشاء النسخة الاحتياطية بنجاح.";
+ msg.textContent=error?"تعذر إنشاء النسخة الاحتياطية.":"Backup created successfully بنجاح.";
  await loadBackups();
 }
 window.downloadBackup=async id=>{const b=(window.__backups||[]).find(x=>x.id===id);if(!b)return;const blob=new Blob([JSON.stringify(b.snapshot,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aya-crm-backup-"+new Date(b.created_at).toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(a.href)};
-window.restoreBackup=async id=>{const b=(window.__backups||[]).find(x=>x.id===id);if(!b)return;if(!confirm("استرجاع هذه النسخة سيستبدل بيانات العملاء والمتابعات والخانات الحالية. يفضّل إنشاء نسخة حالية أولًا. هل تريدين المتابعة؟"))return;await restoreSnapshot(b.snapshot)};
-window.deleteBackup=async id=>{if(!confirm("حذف النسخة الاحتياطية؟"))return;await sb.from("crm_backups").delete().eq("id",id).eq("user_id",user.id);await loadBackups()};
+window.restoreBackup=async id=>{const b=(window.__backups||[]).find(x=>x.id===id);if(!b)return;if(!confirm("استرجاع هذه النسخة سيستبدل بيانات Clients وFollow-ups وFields الحالية. يفضّل إنشاء نسخة حالية أولًا. هل تريدين الFollow-up؟"))return;await restoreSnapshot(b.snapshot)};
+window.deleteBackup=async id=>{if(!confirm("Delete النسخة الاحتياطية؟"))return;await sb.from("crm_backups").delete().eq("id",id).eq("user_id",user.id);await loadBackups()};
 async function restoreSnapshot(s){
  const msg=$("backupMsg"); msg.textContent="جاري الاسترجاع...";
  try{
@@ -381,8 +381,8 @@ async function restoreSnapshot(s){
  }catch(e){console.error(e);msg.textContent="تعذر الاسترجاع: "+e.message}
 }
 $("createBackup").onclick=createBackup;
-$("downloadLatest").onclick=async()=>{if(!window.__backups?.length){await loadBackups()}if(window.__backups?.[0])downloadBackup(window.__backups[0].id);else $("backupMsg").textContent="لا توجد نسخة لتنزيلها."};
-$("backupFile").onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const s=JSON.parse(await file.text());if(!confirm("استرجاع ملف النسخة سيستبدل البيانات الحالية. هل تريدين المتابعة؟"))return;await restoreSnapshot(s)}catch(err){$("backupMsg").textContent="ملف النسخة غير صالح."}e.target.value=""};
+$("downloadLatest").onclick=async()=>{if(!window.__backups?.length){await loadBackups()}if(window.__backups?.[0])downloadBackup(window.__backups[0].id);else $("backupMsg").textContent="لا توجد نسخة لDownloadها."};
+$("backupFile").onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const s=JSON.parse(await file.text());if(!confirm("استرجاع ملف النسخة سيستبدل البيانات الحالية. هل تريدين الFollow-up؟"))return;await restoreSnapshot(s)}catch(err){$("backupMsg").textContent="ملف النسخة غير صالح."}e.target.value=""};
 
 function notifySoon(){if(!("Notification"in window)||Notification.permission==="granted")return;Notification.requestPermission().catch(()=>{})}
 sb.auth.onAuthStateChange((_e,s)=>start(s));sb.auth.getSession().then(({data})=>start(data.session));

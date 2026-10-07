@@ -221,6 +221,53 @@ window.editClient=id=>openModal(clients.find(c=>c.id===id));
 window.deleteClient=async id=>{if(!confirm("حذف العميل؟"))return;await sb.from("clients").delete().eq("id",id);await load()};
 window.closeFieldModal=()=>$("fieldModal").classList.add("hidden");
 window.deleteField=async id=>{if(!confirm("حذف هذه الخانة؟"))return;await sb.from("crm_fields").update({is_active:false}).eq("id",id).eq("user_id",user.id);await load()};
+$("clientForm").onsubmit=async e=>{
+ e.preventDefault();
+ const saveBtn=$("clientForm").querySelector('button[type="submit"]');
+ if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="جاري الحفظ...";}
+ try{
+  if(!user?.id){throw new Error("انتهت جلسة الدخول، سجلي الدخول مرة أخرى.");}
+  const id=$("clientId").value.trim();
+  const custom_fields={};
+  document.querySelectorAll("[data-custom-key]").forEach(el=>{custom_fields[el.dataset.customKey]=el.value;});
+  const payload={
+   user_id:user.id,
+   name:$("cName").value.trim(),
+   phone:$("cPhone").value.trim()||null,
+   project:$("cProject").value.trim()||null,
+   budget:$("cBudget").value?Number($("cBudget").value):null,
+   status:$("cStatus").value||"new",
+   notes:$("cNotes").value.trim()||null,
+   custom_fields
+  };
+  if(!payload.name){throw new Error("اكتبي اسم العميل أولًا.");}
+  let client;
+  if(id){
+   const r=await sb.from("clients").update({...payload,user_id:undefined}).eq("id",id).eq("user_id",user.id).select("*").single();
+   if(r.error)throw new Error("تعذر تعديل العميل: "+r.error.message);
+   client=r.data;
+  }else{
+   const r=await sb.from("clients").insert(payload).select("*").single();
+   if(r.error)throw new Error("تعذر إضافة العميل: "+r.error.message);
+   client=r.data;
+  }
+  const followDate=$("fDate").value;
+  const followNote=$("fNote").value.trim()||null;
+  if(followDate){
+   const fr=await sb.from("followups").insert({user_id:user.id,client_id:client.id,followup_at:new Date(followDate).toISOString(),note:followNote,completed:false});
+   if(fr.error)throw new Error("تم حفظ العميل لكن تعذر حفظ موعد المتابعة: "+fr.error.message);
+  }
+  closeModal();
+  await load();
+  alert(id?"تم تعديل العميل بنجاح":"تمت إضافة العميل بنجاح");
+ }catch(err){
+  console.error(err);
+  alert(err.message||"تعذر حفظ العميل");
+ }finally{
+  if(saveBtn){saveBtn.disabled=false;saveBtn.textContent="حفظ";}
+ }
+};
+
 $("addFieldBtn").onclick=()=>$("fieldModal").classList.remove("hidden");
 $("newFieldType").onchange=()=>{$("newFieldOptionsWrap").style.display=$("newFieldType").value==="select"?"block":"none"};
 $("createField").onclick=async()=>{

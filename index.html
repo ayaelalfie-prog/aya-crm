@@ -125,7 +125,7 @@ async function ensureFields(){
 }
 
 window.ensureFields=ensureFields;
-const statusText={new:"New",followup:"Follow-up",interested:"Interested",contracted:"Contracted",not_interested:"غير Interested"};
+const statusText={new:"New",followup:"Follow-up",interested:"Interested",contracted:"Contracted",not_interested:"Not Interested",no_response:"No Response",bought:"Bought"};
 function badge(s){
  const sf=fields.find(f=>f.field_key==="status");
  const opt=(sf?.options||[]).find(o=>typeof o==="object"?o.value===s:o===s);
@@ -199,8 +199,8 @@ $("addCommentBtn").onclick=async()=>{const clientId=$("clientId").value, input=$
 function renderStatusOptions(selected){
  const sel=$("cStatus"); if(!sel)return;
  const sf=fields.find(f=>f.field_key==="status");
- const raw=sf?.options?.length?sf.options:["New","Follow-up","Interested","Contracted","غير Interested"];
- const known={New:"new",Follow-up:"followup",Interested:"interested","Contracted":"contracted","غير Interested":"not_interested"};
+ const raw=sf?.options?.length?sf.options:["New","Follow-up","Interested","Contracted","Not Interested","No Response","Bought"];
+ const known={New:"new","Follow-up":"followup",Interested:"interested","Contracted":"contracted","Not Interested":"not_interested","No Response":"no_response",Bought:"bought"};
  const opts=raw.map(o=>typeof o==="object"?o:{value:known[o]||o,label:o});
  sel.innerHTML=opts.map(o=>'<option value="'+esc(o.value)+'">'+esc(o.label)+'</option>').join("");
  if(selected && opts.some(o=>String(o.value)===String(selected)))sel.value=selected;
@@ -318,7 +318,7 @@ $("saveFields").onclick=async()=>{
     data.options=labels.map(label=>{
      const old=oldByLabel.get(label);
      if(old&&typeof old==="object")return old;
-     const known={New:"new",Follow-up:"followup",Interested:"interested","Contracted":"contracted","غير Interested":"not_interested"};
+     const known={New:"new","Follow-up":"followup",Interested:"interested","Contracted":"contracted","Not Interested":"not_interested","No Response":"no_response",Bought:"bought"};
      return {value:known[label]||("custom_"+Date.now()+"_"+Math.random().toString(36).slice(2,7)),label};
     });
    }

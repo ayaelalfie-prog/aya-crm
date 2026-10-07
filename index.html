@@ -257,8 +257,15 @@ $("clientForm").onsubmit=async e=>{
    const fr=await sb.from("followups").insert({user_id:user.id,client_id:client.id,followup_at:new Date(followDate).toISOString(),note:followNote,completed:false});
    if(fr.error)throw new Error("تم حفظ العميل لكن تعذر حفظ موعد المتابعة: "+fr.error.message);
   }
+  // حدّثي القائمة فورًا من العميل المحفوظ حتى لو فشل تحميل بيانات جانبية.
+  if(id){
+   clients=clients.map(x=>x.id===client.id?client:x);
+  }else{
+   clients=[client,...clients.filter(x=>x.id!==client.id)];
+  }
+  render();
   closeModal();
-  await load();
+  showPage("dashboard");
   alert(id?"تم تعديل العميل بنجاح":"تمت إضافة العميل بنجاح");
  }catch(err){
   console.error(err);

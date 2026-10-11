@@ -41,7 +41,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
   try{
    const email=(document.getElementById("email")||{}).value?.trim()||"";
    const password=(document.getElementById("password")||{}).value||"";
-   if(!email||!password){msg.textContent="اكتبي Email وPassword أولًا."; return;}
+   if(!email||!password){msg.textContent="Please enter your email and password."; return;}
    if(!window.supabase){
     msg.textContent="Loading login service...";
     await new Promise((resolve,reject)=>{
@@ -87,12 +87,12 @@ if(earlyLoginBtn){
   earlyLoginBtn.disabled=true; earlyLoginBtn.textContent="Logging in...";
   try{
    const email=$("email").value.trim(), password=$("password").value;
-   if(!email||!password){earlyAuthMsg.textContent="اكتبي Email وPassword أولًا.";return}
+   if(!email||!password){earlyAuthMsg.textContent="Please enter your email and password.";return}
    const result=await sb.auth.signInWithPassword({email,password});
    if(result.error){earlyAuthMsg.textContent=result.error.message||"Invalid email or password.";return}
-   earlyAuthMsg.textContent="تم الLogin بنجاح...";
+   earlyAuthMsg.textContent="Login successful...";
    await start(result.data.session);
-  }catch(e){console.error(e);earlyAuthMsg.textContent="حصل خطأ أثناء الLogin: "+(e.message||"Unknown error")}
+  }catch(e){console.error(e);earlyAuthMsg.textContent="Login error: "+(e.message||"Unknown error")}
   finally{earlyLoginBtn.disabled=false;earlyLoginBtn.textContent="Login"}
  };
 }
@@ -141,7 +141,7 @@ async function load(){
  if(c.error) throw new Error("Error loading clients: "+c.error.message);
  clients=c.data||[];
  const cm=await sb.from("client_comments").select("*").eq("user_id",user.id).order("created_at",{ascending:false});
- if(cm.error){console.warn("تعذر تحميل Client Commentss:",cm.error.message);clientComments=[]}
+ if(cm.error){console.warn("Unable to load client comments:",cm.error.message);clientComments=[]}
  else clientComments=cm.data||[];
  const f=await sb.from("followups").select("*").eq("user_id",user.id).order("followup_at",{ascending:true});
  if(f.error){console.warn("Unable to load follow-ups:",f.error.message);followups=[]}
@@ -174,17 +174,17 @@ function render(){
  $("mLate").textContent=followups.filter(x=>!x.completed&&new Date(x.followup_at)<now).length;
  $("mInterested").textContent=clients.filter(x=>x.status==="interested").length;
  $("dashClients").innerHTML=clients.slice(0,6).map(c=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+esc(c.name)+'</b><div class="muted">'+esc(c.project||"—")+' · '+badge(c.status)+'</div></div>').join("")||'<div class="empty">No clients yet</div>';
- $("dashFollowups").innerHTML=followups.filter(x=>!x.completed).slice(0,6).map(f=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+esc(f.clients?.name||"عميل")+'</b><div class="muted">'+fmt(f.followup_at)+(new Date(f.followup_at)<now?' · <span style="color:#d34b4b">Overdueة</span>':"")+'</div></div>').join("")||'<div class="empty">No follow-ups</div>';
+ $("dashFollowups").innerHTML=followups.filter(x=>!x.completed).slice(0,6).map(f=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+esc(f.clients?.name||"Client")+'</b><div class="muted">'+fmt(f.followup_at)+(new Date(f.followup_at)<now?' · <span style="color:#d34b4b">Overdue</span>':"")+'</div></div>').join("")||'<div class="empty">No follow-ups</div>';
  const q=($("search")?.value||"").toLowerCase(); const filtered=clients.filter(c=>(c.name+" "+(c.phone||"")+" "+(c.project||"")).toLowerCase().includes(q));
  $("clientsBody").innerHTML=filtered.map(c=>'<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.phone||"—")+'</td><td>'+esc(c.project||"—")+'</td><td>'+badge(c.status)+'</td><td>'+wa(c.phone)+'</td><td><div class="row-actions"><button class="secondary" onclick="editClient(\''+c.id+'\')">Edit</button><button class="danger" onclick="deleteClient(\''+c.id+'\')">Delete</button></div></td></tr>').join("")||'<tr><td colspan="6"><div class="empty">No clients found</div></td></tr>';
  const ff=$("filterFollow")?.value||"all"; const fl=followups.filter(x=>ff==="all"||ff==="open"&&!x.completed||ff==="done"&&x.completed);
- $("followupsList").innerHTML=fl.map(f=>'<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>'+esc(f.clients?.name||"عميل")+'</b><div class="muted">'+wa(f.clients?.phone)+'</div></div><div class="muted">'+fmt(f.followup_at)+'</div></div><p>'+esc(f.note||"No notes")+'</p><button class="'+(f.completed?"secondary":"primary")+'" onclick="toggleFollow(\''+f.id+'\','+(f.completed?"false":"true")+')">'+(f.completed?"Cancel Completion":"Follow-up completed")+'</button></div>').join("")||'<div class="empty">No follow-ups</div>';
+ $("followupsList").innerHTML=fl.map(f=>'<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>'+esc(f.clients?.name||"Client")+'</b><div class="muted">'+wa(f.clients?.phone)+'</div></div><div class="muted">'+fmt(f.followup_at)+'</div></div><p>'+esc(f.note||"No notes")+'</p><button class="'+(f.completed?"secondary":"primary")+'" onclick="toggleFollow(\''+f.id+'\','+(f.completed?"false":"true")+')">'+(f.completed?"Cancel Completion":"Follow-up completed")+'</button></div>').join("")||'<div class="empty">No follow-ups</div>';
 }
 function fmt(v){
  if(!v)return "—";
  const d=new Date(v);
  if(isNaN(d.getTime()))return String(v);
- return d.toLocaleString("ar-EG",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
+ return d.toLocaleString("en-US",{year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"});
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 
@@ -237,7 +237,7 @@ function openModal(c=null){
 function closeModal(){$("modal").classList.add("hidden")}
 window.closeModal=closeModal;
 window.editClient=id=>openModal(clients.find(c=>c.id===id));
-window.deleteClient=async id=>{if(!confirm("Delete Client؟"))return;await sb.from("clients").delete().eq("id",id);await load()};
+window.deleteClient=async id=>{if(!confirm("Delete this client?"))return;await sb.from("clients").delete().eq("id",id);await load()};
 window.closeFieldModal=()=>$("fieldModal").classList.add("hidden");
 window.deleteField=async id=>{if(!confirm("Delete this field?"))return;await sb.from("crm_fields").update({is_active:false}).eq("id",id).eq("user_id",user.id);await load()};
 $("clientForm").onsubmit=async e=>{
@@ -276,7 +276,7 @@ $("clientForm").onsubmit=async e=>{
    const fr=await sb.from("followups").insert({user_id:user.id,client_id:client.id,followup_at:new Date(followDate).toISOString(),note:followNote,completed:false});
    if(fr.error)throw new Error("Client saved, but follow-up could not be saved: "+fr.error.message);
   }
-  // حدّثي القائمة فورًا من Client المحفوظ حتى لو فشل تحميل بيانات جانبية.
+  // Update the list immediately from the saved client, even if a secondary data load fails.
   if(id){
    clients=clients.map(x=>x.id===client.id?client:x);
   }else{
@@ -327,7 +327,7 @@ $("saveFields").onclick=async()=>{
   }
   if(Object.keys(data).length)await sb.from("crm_fields").update(data).eq("id",f.id).eq("user_id",user.id);
  }
- await load(); renderStatusOptions(); alert("تم Save Fields وOptions بنجاح");
+ await load(); renderStatusOptions(); alert("Fields and options saved successfully");
 };
 $("search").oninput=render;$("filterFollow").onchange=render;$("addBtn").onclick=()=>openModal();$("addBtn2").onclick=()=>openModal();
 window.showPage=async function(page){document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));const target=document.getElementById(page);if(target)target.classList.remove("hidden");const btn=document.querySelector(".nav button[data-page=\""+page+"\"]");if(btn)document.getElementById("pageTitle").textContent=btn.textContent.replace(/^\S+\s*/,"");if(page==="backups")await loadBackups();};
@@ -335,9 +335,9 @@ window.showPage=async function(page){document.querySelectorAll(".nav button").fo
 $("signupBtn").onclick=async()=>{
  try{
   const email=$("email").value.trim(), password=$("password").value;
-  if(!email||!password){$("authMsg").textContent="اكتبي Email وPassword أولًا.";return}
+  if(!email||!password){$("authMsg").textContent="Please enter your email and password.";return}
   const {error}=await sb.auth.signUp({email,password});
-  $("authMsg").textContent=error?error.message:"تم إنشاء الحساب. لو ظهر تأكيد Email، أكديه ثم سجّلي الLogin.";
+  $("authMsg").textContent=error?error.message:"Account created. If email confirmation is required, confirm your email, then log in.";
  }catch(e){$("authMsg").textContent="Error creating account."}
 };
 $("logout").onclick=()=>sb.auth.signOut();
@@ -366,19 +366,19 @@ async function loadBackups(){
 async function createBackup(){
  const msg=$("backupMsg"); msg.textContent="Creating backup...";
  const snapshot=await getBackupSnapshot();
- const {error}=await sb.from("crm_backups").insert({user_id:user.id,label:"Backup "+new Date().toLocaleString("ar-EG"),snapshot});
- msg.textContent=error?"تعذر إنشاء الBackup الاحتياطية.":"Backup created successfully بنجاح.";
+ const {error}=await sb.from("crm_backups").insert({user_id:user.id,label:"Backup "+new Date().toLocaleString("en-US"),snapshot});
+ msg.textContent=error?"Unable to create backup.":"Backup created successfully.";
  await loadBackups();
 }
 window.downloadBackup=async id=>{const b=(window.__backups||[]).find(x=>x.id===id);if(!b)return;const blob=new Blob([JSON.stringify(b.snapshot,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="aya-crm-backup-"+new Date(b.created_at).toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(a.href)};
-window.restoreBackup=async id=>{const b=(window.__backups||[]).find(x=>x.id===id);if(!b)return;if(!confirm("Restore هذه الBackup سيستبدل بيانات Clients وFollow-ups وFields الحالية. يفضّل إنشاء Backup حالية أولًا. Continue?"))return;await restoreSnapshot(b.snapshot)};
-window.deleteBackup=async id=>{if(!confirm("Delete الBackup الاحتياطية؟"))return;await sb.from("crm_backups").delete().eq("id",id).eq("user_id",user.id);await loadBackups()};
+window.restoreBackup=async id=>{const b=(window.__backups||[]).find(x=>x.id===id);if(!b)return;if(!confirm("Restoring this backup will replace your current clients, follow-ups, and fields. Create a backup first if needed. Continue?"))return;await restoreSnapshot(b.snapshot)};
+window.deleteBackup=async id=>{if(!confirm("Delete this backup?"))return;await sb.from("crm_backups").delete().eq("id",id).eq("user_id",user.id);await loadBackups()};
 async function restoreSnapshot(s){
- const msg=$("backupMsg"); msg.textContent="جاري الRestore...";
+ const msg=$("backupMsg"); msg.textContent="Restoring backup...";
  try{
-  if(!s||!Array.isArray(s.clients)||!Array.isArray(s.followups)||!Array.isArray(s.fields))throw new Error("ملف الBackup غير صالح");
+  if(!s||!Array.isArray(s.clients)||!Array.isArray(s.followups)||!Array.isArray(s.fields))throw new Error("Invalid backup file");
   const current=await getBackupSnapshot();
-  await sb.from("crm_backups").insert({user_id:user.id,label:"Backup تلقائية قبل الRestore "+new Date().toLocaleString("ar-EG"),snapshot:current});
+  await sb.from("crm_backups").insert({user_id:user.id,label:"Automatic backup before restore "+new Date().toLocaleString("en-US"),snapshot:current});
   await sb.from("followups").delete().eq("user_id",user.id);
   await sb.from("clients").delete().eq("user_id",user.id);
   await sb.from("crm_fields").delete().eq("user_id",user.id);
@@ -390,12 +390,12 @@ async function restoreSnapshot(s){
   const oldByName=new Map((s.clients||[]).map(x=>[x.id,x]));
   const followClean=s.followups.map(({id,...x})=>{const oldClient=oldByName.get(x.client_id);const newClient=(newClients.data||[]).find(n=>n.name===oldClient?.name&&n.phone===oldClient?.phone);return {...x,user_id:user.id,client_id:newClient?.id||null}}).filter(x=>x.client_id);
   if(followClean.length)await sb.from("followups").insert(followClean);
-  await load(); await loadBackups(); msg.textContent="تم Restore الBackup بنجاح.";
- }catch(e){console.error(e);msg.textContent="تعذر الRestore: "+e.message}
+  await load(); await loadBackups(); msg.textContent="Backup restored successfully.";
+ }catch(e){console.error(e);msg.textContent="Restore failed: "+e.message}
 }
 $("createBackup").onclick=createBackup;
-$("downloadLatest").onclick=async()=>{if(!window.__backups?.length){await loadBackups()}if(window.__backups?.[0])downloadBackup(window.__backups[0].id);else $("backupMsg").textContent="لا توجد Backup لDownloadها."};
-$("backupFile").onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const s=JSON.parse(await file.text());if(!confirm("Restore ملف الBackup سيستبدل البيانات الحالية. Continue?"))return;await restoreSnapshot(s)}catch(err){$("backupMsg").textContent="ملف الBackup غير صالح."}e.target.value=""};
+$("downloadLatest").onclick=async()=>{if(!window.__backups?.length){await loadBackups()}if(window.__backups?.[0])downloadBackup(window.__backups[0].id);else $("backupMsg").textContent="No backup available to download."};
+$("backupFile").onchange=async e=>{const file=e.target.files?.[0];if(!file)return;try{const s=JSON.parse(await file.text());if(!confirm("Restoring this backup file will replace current data. Continue?"))return;await restoreSnapshot(s)}catch(err){$("backupMsg").textContent="Invalid backup file."}e.target.value=""};
 
 function notifySoon(){if(!("Notification"in window)||Notification.permission==="granted")return;Notification.requestPermission().catch(()=>{})}
 sb.auth.onAuthStateChange((_e,s)=>start(s));sb.auth.getSession().then(({data})=>start(data.session));

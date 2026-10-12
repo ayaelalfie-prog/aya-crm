@@ -24,7 +24,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 <main class="main"><div class="top"><div><h1 id="pageTitle">Dashboard</h1><div class="muted">Real Estate Client & Follow-up Management</div></div><button id="addBtn" class="primary">+ Add Client</button></div>
 <section id="dashboard" class="page"><div class="cards"><div class="card"><div class="muted">Total Clients</div><div id="mTotal" class="metric">0</div></div><div class="card"><div class="muted">Today’s Follow-ups</div><div id="mToday" class="metric">0</div></div><div class="card"><div class="muted">Overdue Follow-ups</div><div id="mLate" class="metric">0</div></div><div class="card"><div class="muted">Interested Leads</div><div id="mInterested" class="metric">0</div></div></div>
 <div class="grid"><div class="section"><h2>Upcoming Follow-ups</h2><div id="dashFollowups"></div></div><div class="section"><h2>Recent Clients</h2><div id="dashClients"></div></div></div></section>
-<section id="clients" class="page hidden"><div class="section"><div class="toolbar"><input id="search" placeholder="Search by name, phone, or project"><button class="secondary" id="addBtn2">+ Add Client</button></div><div class="table-wrap"><table class="table"><thead><tr><th>Client</th><th>Phone</th><th>Project</th><th>Status</th><th>Actions</th></tr></thead><tbody id="clientsBody"></tbody></table></div></div></section>
+<section id="clients" class="page hidden"><div class="section"><div class="toolbar"><input id="search" placeholder="Search by name, phone, or project"><button class="secondary" id="addBtn2">+ Add Client</button></div><div class="toolbar" style="margin-top:10px;align-items:end"><div class="field" style="flex:1;min-width:160px;margin:0"><label for="registeredFrom">Registered from</label><input id="registeredFrom" type="date"></div><div class="field" style="flex:1;min-width:160px;margin:0"><label for="registeredTo">Registered to</label><input id="registeredTo" type="date"></div><div class="field" style="flex:1;min-width:190px;margin:0"><label for="leadFilter">Lead / follow-up filter</label><select id="leadFilter"><option value="all">All Leads</option><option value="overdue">Overdue Follow-up</option><option value="followup">Has Follow-up</option><option value="no_followup">No Follow-up</option><option value="no_response">No Response</option></select></div><button class="secondary" type="button" id="clearClientFilters">Clear Filters</button></div><div id="filterSummary" class="muted" style="margin:8px 0 12px"></div><div class="table-wrap"><table class="table"><thead><tr><th>Client</th><th>Phone</th><th>Project</th><th>Status</th><th>Actions</th></tr></thead><tbody id="clientsBody"></tbody></table></div></div></section>
 <section id="followups" class="page hidden"><div class="section"><div class="toolbar"><select id="filterFollow"><option value="all">All Follow-ups</option><option value="open">Open</option><option value="done">Completed</option></select></div><div id="followupsList"></div></div></section>
 <section id="settings" class="page hidden"><div class="section"><h2>Customize Client Fields</h2><div class="settings-note">Rename system fields or add custom fields. They will appear when adding or editing a client.</div><div id="fieldsList"></div><button id="saveFields" class="primary" style="margin-top:15px">Save Field Names</button><button id="addFieldBtn" class="secondary" style="margin-top:15px;margin-left:8px">+ Add New Field</button></div></section>
 <section id="backups" class="page hidden"><div class="section"><h2>💾 Backups</h2><div class="settings-note">Back up your clients, follow-ups, and custom fields to the database. You can also download a backup file and restore it later.</div><div class="toolbar"><button id="createBackup" class="primary">+ Create Backup</button><button id="downloadLatest" class="secondary">⬇️ Download Latest Backup</button><input id="backupFile" type="file" accept=".json,application/json" style="max-width:260px"></div><div id="backupMsg" class="muted" style="margin:10px 0"></div><div class="table-wrap"><table class="table"><thead><tr><th>Date</th><th>Backup Name</th><th>Size</th><th>Actions</th></tr></thead><tbody id="backupsBody"></tbody></table></div></div></section>
@@ -175,7 +175,26 @@ function render(){
  $("mInterested").textContent=clients.filter(x=>x.status==="interested").length;
  $("dashClients").innerHTML=clients.slice(0,6).map(c=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+esc(c.name)+'</b><div class="muted">'+esc(c.project||"—")+' · '+badge(c.status)+'</div></div>').join("")||'<div class="empty">No clients yet</div>';
  $("dashFollowups").innerHTML=followups.filter(x=>!x.completed).slice(0,6).map(f=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+esc(f.clients?.name||"Client")+'</b><div class="muted">'+fmt(f.followup_at)+(new Date(f.followup_at)<now?' · <span style="color:#d34b4b">Overdue</span>':"")+'</div></div>').join("")||'<div class="empty">No follow-ups</div>';
- const q=($("search")?.value||"").toLowerCase(); const filtered=clients.filter(c=>(c.name+" "+(c.phone||"")+" "+(c.project||"")).toLowerCase().includes(q));
+ const q=($("search")?.value||"").trim().toLowerCase();
+ const dateFrom=$("registeredFrom")?.value||"",dateTo=$("registeredTo")?.value||"",leadFilter=$("leadFilter")?.value||"all";
+ const normPhone=v=>String(v||"").replace(/[^0-9٠-٩۰-۹]/g,"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d));
+ const filtered=clients.filter(c=>{
+  const searchable=(String(c.name||"")+" "+String(c.phone||"")+" "+String(c.project||"")+" "+normPhone(c.phone)).toLowerCase();
+  if(q&&!searchable.includes(q)&&!normPhone(c.phone).includes(normPhone(q)))return false;
+  const created=c.created_at?new Date(c.created_at):null;
+  if(dateFrom&&(!created||created<new Date(dateFrom+"T00:00:00")))return false;
+  if(dateTo&&(!created||created>=new Date(dateTo+"T23:59:59.999")))return false;
+  const cf=followups.filter(f=>f.client_id===c.id),open=cf.filter(f=>!f.completed),nowFilter=new Date();
+  const overdue=open.some(f=>f.followup_at&&new Date(f.followup_at)<nowFilter);
+  const hasFollowup=open.some(f=>f.followup_at);
+  if(leadFilter==="overdue"&&!overdue)return false;
+  if(leadFilter==="followup"&&!hasFollowup)return false;
+  if(leadFilter==="no_followup"&&cf.length>0)return false;
+  if(leadFilter==="no_response"&&c.status!=="no_response"&&String(c.status||"").toLowerCase()!=="no response")return false;
+  return true;
+ });
+ const summary=$("filterSummary");if(summary)summary.textContent=filtered.length+" of "+clients.length+" clients";
+
  $("clientsBody").innerHTML=filtered.map(c=>'<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.phone||"—")+'</td><td>'+esc(c.project||"—")+'</td><td>'+badge(c.status)+'</td><td>'+wa(c.phone)+'</td><td><div class="row-actions"><button class="secondary" onclick="editClient(\''+c.id+'\')">Edit</button><button class="danger" onclick="deleteClient(\''+c.id+'\')">Delete</button></div></td></tr>').join("")||'<tr><td colspan="6"><div class="empty">No clients found</div></td></tr>';
  const ff=$("filterFollow")?.value||"all"; const fl=followups.filter(x=>ff==="all"||ff==="open"&&!x.completed||ff==="done"&&x.completed);
  $("followupsList").innerHTML=fl.map(f=>'<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>'+esc(f.clients?.name||"Client")+'</b><div class="muted">'+wa(f.clients?.phone)+'</div></div><div class="muted">'+fmt(f.followup_at)+'</div></div><p>'+esc(f.note||"No notes")+'</p><button class="'+(f.completed?"secondary":"primary")+'" onclick="toggleFollow(\''+f.id+'\','+(f.completed?"false":"true")+')">'+(f.completed?"Cancel Completion":"Follow-up completed")+'</button></div>').join("")||'<div class="empty">No follow-ups</div>';
@@ -347,7 +366,7 @@ $("saveFields").onclick=async()=>{
  }
  await load(); renderStatusOptions(); alert("Fields and options saved successfully");
 };
-$("search").oninput=render;$("filterFollow").onchange=render;$("addBtn").onclick=()=>openModal();$("addBtn2").onclick=()=>openModal();
+$("search").oninput=render;$("registeredFrom").onchange=render;$("registeredTo").onchange=render;$("leadFilter").onchange=render;$("clearClientFilters").onclick=()=>{$("search").value="";$("registeredFrom").value="";$("registeredTo").value="";$("leadFilter").value="all";render()};$("filterFollow").onchange=render;$("addBtn").onclick=()=>openModal();$("addBtn2").onclick=()=>openModal();
 window.showPage=async function(page){document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));const target=document.getElementById(page);if(target)target.classList.remove("hidden");const btn=document.querySelector(".nav button[data-page=\""+page+"\"]");if(btn)document.getElementById("pageTitle").textContent=btn.textContent.replace(/^\S+\s*/,"");if(page==="backups")await loadBackups();};
 
 $("signupBtn").onclick=async()=>{

@@ -260,6 +260,24 @@ $("clientForm").onsubmit=async e=>{
    custom_fields
   };
   if(!payload.name){throw new Error("Please enter a client name.");}
+  // Prevent duplicate phone numbers for this account (ignore spaces, +, dashes, and Arabic numerals).
+  const normalizePhone=value=>String(value||"")
+   .replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d))
+   .replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d))
+   .replace(/\\D/g,"");
+  if(payload.phone){
+   const phoneKey=normalizePhone(payload.phone);
+   if(phoneKey){
+    const existingResult=await sb.from("clients").select("id,name,phone").eq("user_id",user.id);
+    if(existingResult.error)throw new Error("Could not check for duplicate phone numbers: "+existingResult.error.message);
+    const duplicate= (existingResult.data||[]).find(x=>x.id!==id && normalizePhone(x.phone)===phoneKey);
+    if(duplicate){
+     alert("This phone number already exists for client: "+(duplicate.name||"Unnamed client")+".\nPlease check the Clients list.");
+     $("cPhone").focus();
+     return;
+    }
+   }
+  }
   let client;
   if(id){
    const r=await sb.from("clients").update({...payload,user_id:undefined}).eq("id",id).eq("user_id",user.id).select("*").single();

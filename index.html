@@ -420,8 +420,20 @@ $("excelFileInput").onchange=async e=>{
    if(candidate.some(isNameHeader)){headerIndex=ri;headers=candidate;break;}
   }
   if(headerIndex<0){
-   const preview=(matrix[0]||[]).slice(0,12).map(v=>String(v??"").trim()).filter(Boolean).join(" | ");
-   throw new Error("Could not identify the Client Name column. No data was imported. First row found: "+(preview||"(empty)")+". Please use the Download Template or make sure your file has a column named Client Name, Name, Full Name, اسم العميل, or الاسم.");
+   // Support headerless contact exports like the user's commercial leads workbook:
+   // column A = serial number, column B = phone, column C = client name.
+   const looksLikePhone=v=>{
+    const digits=String(v??"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/\\D/g,"");
+    return digits.length>=8;
+   };
+   const headerlessContacts=matrix.some(row=>row&&looksLikePhone(row[1])&&String(row[2]??"").trim().length>1);
+   if(headerlessContacts){
+    headerIndex=0;
+    headers=["Serial","Phone","Client Name"];
+   }else{
+    const preview=(matrix[0]||[]).slice(0,12).map(v=>String(v??"").trim()).filter(Boolean).join(" | ");
+    throw new Error("Could not identify the Client Name column. No data was imported. First row found: "+(preview||"(empty)")+". Please use the Download Template or make sure your file has a column named Client Name, Name, Full Name, اسم العميل, or الاسم.");
+   }
   }
   headers=headers.map((h,i)=>h||("Column "+(i+1)));
   const raw=matrix.slice(headerIndex+1).filter(row=>row.some(v=>String(v??"").trim()!=="")).map(row=>{

@@ -31,7 +31,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 <section id="backups" class="page hidden"><div class="section"><h2>💾 Backups</h2><div class="settings-note">Back up your clients, follow-ups, and custom fields to the database. You can also download a backup file and restore it later.</div><div class="toolbar"><button id="createBackup" class="primary">+ Create Backup</button><button id="downloadLatest" class="secondary">⬇️ Download Latest Backup</button><input id="backupFile" type="file" accept=".json,application/json" style="max-width:260px"></div><div id="backupMsg" class="muted" style="margin:10px 0"></div><div class="table-wrap"><table class="table"><thead><tr><th>Date</th><th>Backup Name</th><th>Size</th><th>Actions</th></tr></thead><tbody id="backupsBody"></tbody></table></div></div></section>
 </main></div>
 <div id="modal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h2 id="modalTitle">Add Client</h2><button class="x" onclick="closeModal()">×</button></div>
-<form id="clientForm"><input type="hidden" id="clientId"><div class="form-grid"><div class="field"><label>Client Name *</label><input id="cName" required></div><div class="field"><label>Phone Number</label><input id="cPhone"></div><div class="field"><label>Project</label><input id="cProject" placeholder="e.g. New Narges"></div><div class="field"><label>Budget</label><input id="cBudget" type="number"></div><div class="field"><label>Status</label><select id="cStatus"><option value="new">New</option><option value="followup">Follow-up</option><option value="interested">Interested</option><option value="contracted">Contracted</option><option value="not_interested">Not Interested</option><option value="no_response">No Response</option><option value="bought">Bought</option></select></div><div class="field"><label>Follow-up Date</label><input id="fDate" type="datetime-local"></div><div class="field full"><label id="labelNotes">Notes</label><textarea id="cNotes"></textarea></div><div class="field full"><label>Client Comments</label><div id="commentsList" style="display:grid;gap:8px;margin-bottom:10px"></div><div style="display:flex;gap:8px"><input id="newComment" placeholder="Write a comment about this client"><button type="button" id="addCommentBtn" class="secondary">+ Add Comment</button></div></div><div id="customFieldsContainer" class="full"></div><div class="field full"><label>Follow-up Note</label><input id="fNote" placeholder="e.g. Call to share prices"></div></div><button class="primary" type="submit" style="width:100%">Save</button></form></div></div>
+<form id="clientForm"><input type="hidden" id="clientId"><div class="form-grid"><div class="field"><label>Client Name *</label><input id="cName" required></div><div class="field"><label>Phone Number</label><input id="cPhone"></div><div class="field"><label>Project</label><select id="cProject"><option value="">Select Project</option></select></div><div class="field"><label>Budget</label><input id="cBudget" type="number"></div><div class="field"><label>Status</label><select id="cStatus"><option value="new">New</option><option value="followup">Follow-up</option><option value="interested">Interested</option><option value="contracted">Contracted</option><option value="not_interested">Not Interested</option><option value="no_response">No Response</option><option value="bought">Bought</option></select></div><div class="field"><label>Follow-up Date</label><input id="fDate" type="datetime-local"></div><div class="field full"><label id="labelNotes">Notes</label><textarea id="cNotes"></textarea></div><div class="field full"><label>Client Comments</label><div id="commentsList" style="display:grid;gap:8px;margin-bottom:10px"></div><div style="display:flex;gap:8px"><input id="newComment" placeholder="Write a comment about this client"><button type="button" id="addCommentBtn" class="secondary">+ Add Comment</button></div></div><div id="customFieldsContainer" class="full"></div><div class="field full"><label>Follow-up Note</label><input id="fNote" placeholder="e.g. Call to share prices"></div></div><button class="primary" type="submit" style="width:100%">Save</button></form></div></div>
 <div id="fieldModal" class="modal hidden"><div class="modal-card"><div class="modal-head"><h2>Add New Field</h2><button class="x" onclick="closeFieldModal()">×</button></div><div class="field"><label>Field Name</label><input id="newFieldLabel" placeholder="e.g. Lead Source"></div><div class="field"><label>Field Type</label><select id="newFieldType"><option value="text">Text</option><option value="textarea">Long Text</option><option value="number">Number</option><option value="date">Date</option><option value="select">Options</option></select></div><div id="newFieldOptionsWrap" class="field" style="display:none"><label>Options</label><input id="newFieldOptions" placeholder="Facebook, WhatsApp, Referral"></div><button id="createField" class="primary" style="width:100%">Add Field</button></div></div>
 <script>
 (function(){
@@ -102,7 +102,7 @@ async function ensureFields(){
  const defaults=[
   ["name","Client Name","text",true,1,[]],
   ["phone","Phone","text",true,2,[]],
-  ["project","Project","text",true,3,[]],
+  ["project","Project","select",true,3,["Vivenda - North House","Vivenda - First District","Vivenda - Fourth District","Vivenda - Fifth District","Vivenda - Lotus Sector 4","Vivenda - El Mostashareen Compound","Vivenda - Gardenia","Vivenda - Andalus","Vivenda - New Narges","Vivenda - Beit El Watan","Barwa - Central Mall","Barwa Mall","Hapt 5 Mall","Zahraa El-Asma’a Mall","Solas Mall","Other"]],
   ["budget","Budget","number",true,4,[]],
   ["status","Status","select",true,5,["New","Follow-up","Interested","Contracted","Not Interested"]],
   ["notes","Notes","textarea",true,6,[]]
@@ -122,8 +122,16 @@ async function ensureFields(){
   if(missing.length){
    const ins=await sb.from("crm_fields").insert(missing).select("*");
    if(ins.error)throw new Error("Error completing fields: "+ins.error.message);
-   fields=[...fields,...(ins.data||[])].sort((a,b)=>a.sort_order-b.sort_order);
+   fields=[...fields,...(ins.data||[])];
   }
+  const projectField=fields.find(x=>x.field_key==="project");
+  const projectDefault=defaults.find(x=>x[0]==="project");
+  if(projectField&&(projectField.field_type!=="select"||!Array.isArray(projectField.options)||!projectField.options.length)){
+   const upd=await sb.from("crm_fields").update({field_type:"select",options:projectDefault[5]}).eq("id",projectField.id).eq("user_id",user.id).select("*").single();
+   if(upd.error)throw new Error("Unable to configure Project choices: "+upd.error.message);
+   fields=fields.map(x=>x.id===projectField.id?upd.data:x);
+  }
+  fields.sort((a,b)=>a.sort_order-b.sort_order);
  }
 }
 
@@ -233,7 +241,11 @@ function openModal(c=null){
  $("clientId").value=c?.id||"";
  $("cName").value=c?.name||"";
  $("cPhone").value=c?.phone||"";
- $("cProject").value=c?.project||"";
+ const projectField=fields.find(f=>f.field_key==="project");
+ const projectOptions=Array.isArray(projectField?.options)?projectField.options:[];
+ const currentProject=c?.project||"";
+ $("cProject").innerHTML='<option value="">Select Project</option>'+projectOptions.map(o=>'<option value="'+esc(o)+'">'+esc(o)+'</option>').join("")+(currentProject&&!projectOptions.some(o=>String(o)===String(currentProject))?'<option value="'+esc(currentProject)+'">'+esc(currentProject)+' (existing)</option>':"");
+ $("cProject").value=currentProject;
  $("cBudget").value=c?.budget||"";
  $("cStatus").value=c?.status||"new";
  renderStatusOptions(c?.status||"new");

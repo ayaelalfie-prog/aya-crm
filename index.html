@@ -242,9 +242,9 @@ function openModal(c=null){
  $("cName").value=c?.name||"";
  $("cPhone").value=c?.phone||"";
  const projectField=fields.find(f=>f.field_key==="project");
- const projectOptions=Array.isArray(projectField?.options)?projectField.options:[];
- const currentProject=c?.project||"";
- $("cProject").innerHTML='<option value="">Select Project</option>'+projectOptions.map(o=>'<option value="'+esc(o)+'">'+esc(o)+'</option>').join("")+(currentProject&&!projectOptions.some(o=>String(o)===String(currentProject))?'<option value="'+esc(currentProject)+'">'+esc(currentProject)+' (existing)</option>':"");
+ const projectOptions=(Array.isArray(projectField?.options)?projectField.options:[]).map(o=>String(o&&typeof o==="object"?(o.label??o.value??""):o).trim()).filter(Boolean);
+ const currentProject=String(c?.project||"");
+ $("cProject").innerHTML='<option value="">Select Project</option>'+projectOptions.map(o=>'<option value="'+esc(o)+'">'+esc(o)+'</option>').join("")+(currentProject&&!projectOptions.includes(currentProject)?'<option value="'+esc(currentProject)+'">'+esc(currentProject)+' (existing)</option>':"");
  $("cProject").value=currentProject;
  $("cBudget").value=c?.budget||"";
  $("cStatus").value=c?.status||"new";
@@ -262,7 +262,7 @@ function openModal(c=null){
  const box=$("customFieldsContainer"), vals=c?.custom_fields||{};
  box.innerHTML=fields.filter(f=>!f.is_system&&f.is_active).map(f=>{
   let v=vals[f.field_key]??"";
-  if(f.field_type==="select")return '<div class="field full"><label>'+esc(f.label)+'</label><select data-custom-key="'+esc(f.field_key)+'"><option value="">—</option>'+((f.options||[]).map(o=>'<option '+(String(o)===String(v)?"selected":"")+'>'+esc(o)+'</option>').join(""))+'</select></div>';
+   if(f.field_type==="select")return '<div class="field full"><label>'+esc(f.label)+'</label><select data-custom-key="'+esc(f.field_key)+'"><option value="">—</option>'+((f.options||[]).map(o=>{const label=String(o&&typeof o==="object"?(o.label??o.value??""):o);const value=String(o&&typeof o==="object"?(o.value??o.label??""):o);return '<option value="'+esc(value)+'" '+(value===String(v)||label===String(v)?"selected":"")+' >'+esc(label)+'</option>'}).join(""))+'</select></div>';
   return '<div class="field full"><label>'+esc(f.label)+'</label><input data-custom-key="'+esc(f.field_key)+'" type="'+(f.field_type==="number"?"number":f.field_type==="date"?"date":"text")+'" value="'+esc(v)+'"></div>';
  }).join("");
 }

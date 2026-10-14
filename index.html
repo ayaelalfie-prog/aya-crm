@@ -284,7 +284,7 @@ $("clientForm").onsubmit=async e=>{
   const normalizePhone=value=>String(value||"")
    .replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d))
    .replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d))
-   .replace(/\\D/g,"");
+   .replace(/\D/g,"");
   if(payload.phone){
    const phoneKey=normalizePhone(payload.phone);
    if(phoneKey){

@@ -4,6 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Aya CRM</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 :root{--bg:#f6f8fc;--card:#fff;--text:#182230;--muted:#718096;--primary:#6c63ff;--danger:#e55353;--ok:#1ca56f;--border:#e7ebf2}
 *{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -24,7 +25,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 <main class="main"><div class="top"><div><h1 id="pageTitle">Dashboard</h1><div class="muted">Real Estate Client & Follow-up Management</div></div><button id="addBtn" class="primary">+ Add Client</button></div>
 <section id="dashboard" class="page"><div class="cards"><div class="card"><div class="muted">Total Clients</div><div id="mTotal" class="metric">0</div></div><div class="card"><div class="muted">Today’s Follow-ups</div><div id="mToday" class="metric">0</div></div><div class="card"><div class="muted">Overdue Follow-ups</div><div id="mLate" class="metric">0</div></div><div class="card"><div class="muted">Interested Leads</div><div id="mInterested" class="metric">0</div></div></div>
 <div class="grid"><div class="section"><h2>Upcoming Follow-ups</h2><div id="dashFollowups"></div></div><div class="section"><h2>Recent Clients</h2><div id="dashClients"></div></div></div></section>
-<section id="clients" class="page hidden"><div class="section"><div class="toolbar"><input id="search" placeholder="Search by name, phone, or project"><button class="secondary" id="addBtn2">+ Add Client</button></div><div class="toolbar" style="margin-top:10px;align-items:end"><div class="field" style="flex:1;min-width:160px;margin:0"><label for="registeredFrom">Registered from</label><input id="registeredFrom" type="date"></div><div class="field" style="flex:1;min-width:160px;margin:0"><label for="registeredTo">Registered to</label><input id="registeredTo" type="date"></div><div class="field" style="flex:1;min-width:190px;margin:0"><label for="leadFilter">Lead / follow-up filter</label><select id="leadFilter"><option value="all">All Leads</option><option value="overdue">Overdue Follow-up</option><option value="followup">Has Follow-up</option><option value="no_followup">No Follow-up</option><option value="no_response">No Response</option></select></div><button class="secondary" type="button" id="clearClientFilters">Clear Filters</button></div><div id="filterSummary" class="muted" style="margin:8px 0 12px"></div><div class="table-wrap"><table class="table"><thead><tr><th>Client</th><th>Phone</th><th>Project</th><th>Status</th><th>Actions</th></tr></thead><tbody id="clientsBody"></tbody></table></div></div></section>
+<section id="clients" class="page hidden"><div class="section"><div class="toolbar"><input id="search" placeholder="Search by name, phone, or project"><button class="secondary" id="importExcelBtn" type="button">⬆ Import Excel</button><button class="secondary" id="downloadTemplateBtn" type="button">⬇ Download Template</button><input id="excelFileInput" type="file" accept=".xlsx,.xls,.csv" hidden><button class="secondary" id="addBtn2">+ Add Client</button></div><div id="importStatus" class="muted" style="margin:8px 0 12px" role="status" aria-live="polite"></div><div class="toolbar" style="margin-top:10px;align-items:end"><div class="field" style="flex:1;min-width:160px;margin:0"><label for="registeredFrom">Registered from</label><input id="registeredFrom" type="date"></div><div class="field" style="flex:1;min-width:160px;margin:0"><label for="registeredTo">Registered to</label><input id="registeredTo" type="date"></div><div class="field" style="flex:1;min-width:190px;margin:0"><label for="leadFilter">Lead / follow-up filter</label><select id="leadFilter"><option value="all">All Leads</option><option value="overdue">Overdue Follow-up</option><option value="followup">Has Follow-up</option><option value="no_followup">No Follow-up</option><option value="no_response">No Response</option></select></div><button class="secondary" type="button" id="clearClientFilters">Clear Filters</button></div><div id="filterSummary" class="muted" style="margin:8px 0 12px"></div><div class="table-wrap"><table class="table"><thead><tr><th>Client</th><th>Phone</th><th>Project</th><th>Status</th><th>Actions</th></tr></thead><tbody id="clientsBody"></tbody></table></div></div></section>
 <section id="followups" class="page hidden"><div class="section"><div class="toolbar"><select id="filterFollow"><option value="all">All Follow-ups</option><option value="open">Open</option><option value="done">Completed</option></select></div><div id="followupsList"></div></div></section>
 <section id="settings" class="page hidden"><div class="section"><h2>Customize Client Fields</h2><div class="settings-note">Rename system fields or add custom fields. They will appear when adding or editing a client.</div><div id="fieldsList"></div><button id="saveFields" class="primary" style="margin-top:15px">Save Field Names</button><button id="addFieldBtn" class="secondary" style="margin-top:15px;margin-left:8px">+ Add New Field</button></div></section>
 <section id="backups" class="page hidden"><div class="section"><h2>💾 Backups</h2><div class="settings-note">Back up your clients, follow-ups, and custom fields to the database. You can also download a backup file and restore it later.</div><div class="toolbar"><button id="createBackup" class="primary">+ Create Backup</button><button id="downloadLatest" class="secondary">⬇️ Download Latest Backup</button><input id="backupFile" type="file" accept=".json,application/json" style="max-width:260px"></div><div id="backupMsg" class="muted" style="margin:10px 0"></div><div class="table-wrap"><table class="table"><thead><tr><th>Date</th><th>Backup Name</th><th>Size</th><th>Actions</th></tr></thead><tbody id="backupsBody"></tbody></table></div></div></section>
@@ -366,6 +367,102 @@ $("saveFields").onclick=async()=>{
  }
  await load(); renderStatusOptions(); alert("Fields and options saved successfully");
 };
+
+function importNormalizeKey(v){
+ return String(v??"").toLowerCase().trim()
+  .replace(/[أإآ]/g,"ا").replace(/ة/g,"ه")
+  .replace(/[\\s_\\-./()\\[\\]{}:]+/g,"")
+  .replace(/[^a-z0-9\\u0600-\\u06ff]/g,"");
+}
+function importNormalizePhone(v){
+ return String(v??"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d))
+  .replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/\\D/g,"");
+}
+function importDateValue(v){
+ if(v===null||v===undefined||v==="")return "";
+ if(v instanceof Date&&!isNaN(v))return v;
+ if(typeof v==="number"&&window.XLSX?.SSF){
+  const p=XLSX.SSF.parse_date_code(v);if(p)return new Date(p.y,p.m-1,p.d,p.H||0,p.M||0,p.S||0);
+ }
+ const d=new Date(v);return isNaN(d.getTime())?"":d;
+}
+function importStatusValue(v){
+ const s=String(v??"").trim().toLowerCase();
+ const map={"":"new","new":"new","جديد":"new","follow-up":"followup","follow up":"followup","متابعة":"followup","interested":"interested","مهتم":"interested","contracted":"contracted","تم التعاقد":"contracted","not interested":"not_interested","غير مهتم":"not_interested","no response":"no_response","لا يوجد رد":"no_response","bought":"bought","اشتري":"bought","اشترى":"bought"};
+ return map[s]||"new";
+}
+$("importExcelBtn").onclick=()=>{if(!user?.id){alert("Please log in first.");return;}$("excelFileInput").click();};
+$("downloadTemplateBtn").onclick=()=>{
+ if(!window.XLSX){alert("Excel tool is still loading. Please try again.");return;}
+ const headers=["Client Name","Phone","Project","Budget","Status","Notes","Follow-up Date","Follow-up Note",...fields.filter(f=>!f.is_system).map(f=>f.label)];
+ const sample=[["Example Client","01000000000","New Narges",1500000,"New","Facebook lead","","",...fields.filter(f=>!f.is_system).map(()=> "")]];
+ const ws=XLSX.utils.aoa_to_sheet([headers,...sample]);ws["!cols"]=headers.map(()=>({wch:20}));
+ const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Clients");XLSX.writeFile(wb,"Aya_CRM_Import_Template.xlsx");
+};
+$("excelFileInput").onchange=async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ const status=$("importStatus"),btn=$("importExcelBtn");
+ try{
+  if(!user?.id)throw new Error("Please log in again before importing.");
+  if(!window.XLSX)throw new Error("Excel reader could not load. Refresh the page and try again.");
+  btn.disabled=true;status.textContent="Reading Excel file...";
+  const wb=XLSX.read(await file.arrayBuffer(),{type:"array",cellDates:true});
+  const first=wb.SheetNames[0];if(!first)throw new Error("The file has no worksheets.");
+  const raw=XLSX.utils.sheet_to_json(wb.Sheets[first],{defval:"",raw:true});
+  if(!raw.length)throw new Error("No data rows found. Make sure the first row contains column headers.");
+  const headerMap=new Map();
+  Object.keys(raw[0]).forEach(k=>headerMap.set(importNormalizeKey(k),k));
+  const findValue=(row,aliases)=>{
+   for(const alias of aliases){const actual=headerMap.get(importNormalizeKey(alias));if(actual!==undefined&&row[actual]!==""&&row[actual]!==null)return row[actual];}
+   return "";
+  };
+  const aliases={
+   name:["Client Name","Name","Client","Full Name","اسم العميل","الاسم","اسم"],
+   phone:["Phone","Phone Number","Mobile","Mobile Number","Telephone","Number","رقم الهاتف","رقم التليفون","الموبايل","الهاتف","الرقم"],
+   project:["Project","Project Name","المشروع","اسم المشروع"],
+   budget:["Budget","Price","Client Budget","الميزانية","الميزانيه","السعر"],
+   status:["Status","Lead Status","الحالة","الحاله","حالة العميل"],
+   notes:["Notes","Note","Comments","ملاحظات","ملاحظة"],
+   followDate:["Follow-up Date","Follow Up Date","Next Follow-up","Followup","موعد المتابعة","تاريخ المتابعة","ميعاد المتابعة"],
+   followNote:["Follow-up Note","Follow Up Note","Follow-up Details","ملاحظة المتابعة","ملاحظات المتابعة"]
+  };
+  const existingResult=await sb.from("clients").select("id,name,phone").eq("user_id",user.id);
+  if(existingResult.error)throw new Error("Could not check existing phone numbers: "+existingResult.error.message);
+  const knownPhones=new Set((existingResult.data||[]).map(x=>importNormalizePhone(x.phone)).filter(Boolean));
+  let added=0,duplicates=0,invalid=0,followupsAdded=0;const errors=[];
+  const customHeaders=fields.filter(f=>!f.is_system).map(f=>({field:f,aliases:[f.label,f.field_key]}));
+  status.textContent="Importing "+raw.length+" rows...";
+  for(let idx=0;idx<raw.length;idx++){
+   const row=raw[idx];
+   const name=String(findValue(row,aliases.name)||"").trim();
+   const phone=String(findValue(row,aliases.phone)||"").trim();
+   if(!name){invalid++;if(errors.length<5)errors.push("Row "+(idx+2)+": missing client name");continue;}
+   const phoneKey=importNormalizePhone(phone);
+   if(phoneKey&&knownPhones.has(phoneKey)){duplicates++;continue;}
+   const custom_fields={};
+   for(const item of customHeaders){const value=findValue(row,item.aliases);if(value!==""&&value!==null&&value!==undefined)custom_fields[item.field.field_key]=String(value);}
+   const budgetRaw=findValue(row,aliases.budget);
+   const budgetText=String(budgetRaw??"").replace(/[, EGP$£]/gi,"").trim();
+   const budget=budgetText!==""&&Number.isFinite(Number(budgetText))?Number(budgetText):null;
+   const payload={user_id:user.id,name,phone:phone||null,project:String(findValue(row,aliases.project)||"").trim()||null,budget,status:importStatusValue(findValue(row,aliases.status)),notes:String(findValue(row,aliases.notes)||"").trim()||null,custom_fields};
+   const ins=await sb.from("clients").insert(payload).select("*").single();
+   if(ins.error){invalid++;if(errors.length<5)errors.push("Row "+(idx+2)+": "+ins.error.message);continue;}
+   added++;if(phoneKey)knownPhones.add(phoneKey);
+   const fd=importDateValue(findValue(row,aliases.followDate));
+   if(fd){
+    const note=String(findValue(row,aliases.followNote)||"").trim()||null;
+    const fr=await sb.from("followups").insert({user_id:user.id,client_id:ins.data.id,followup_at:fd.toISOString(),note,completed:false});
+    if(fr.error){if(errors.length<5)errors.push("Row "+(idx+2)+": client imported, but follow-up failed: "+fr.error.message);}
+    else followupsAdded++;
+   }
+  }
+  await load();
+  status.textContent="Import complete. Added: "+added+" · Duplicates skipped: "+duplicates+" · Invalid/failed rows: "+invalid+" · Follow-ups added: "+followupsAdded+(errors.length?" · Details: "+errors.join(" | "):"");
+  if(errors.length)alert(status.textContent);else alert("Excel import complete! Added "+added+" clients. Skipped "+duplicates+" duplicate phone numbers.");
+ }catch(err){console.error(err);status.textContent="Import failed: "+(err.message||"Unknown error");alert(status.textContent);}
+ finally{btn.disabled=false;e.target.value="";}
+};
+
 $("search").oninput=render;$("registeredFrom").onchange=render;$("registeredTo").onchange=render;$("leadFilter").onchange=render;$("clearClientFilters").onclick=()=>{$("search").value="";$("registeredFrom").value="";$("registeredTo").value="";$("leadFilter").value="all";render()};$("filterFollow").onchange=render;$("addBtn").onclick=()=>openModal();$("addBtn2").onclick=()=>openModal();
 window.showPage=async function(page){document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));const target=document.getElementById(page);if(target)target.classList.remove("hidden");const btn=document.querySelector(".nav button[data-page=\""+page+"\"]");if(btn)document.getElementById("pageTitle").textContent=btn.textContent.replace(/^\S+\s*/,"");if(page==="backups")await loadBackups();};
 

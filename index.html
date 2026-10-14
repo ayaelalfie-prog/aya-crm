@@ -414,39 +414,44 @@ $("excelFileInput").onchange=async e=>{
    if(!k||k.includes("project")||k.includes("مشروع"))return false;
    return ["clientname","fullname","customername","leadname","prospectname","name","client","customer","lead","اسم العميل","اسم العميل المحتمل","اسم العميل والشركة","الاسم بالكامل","اسم","الاسم","العميل","العميل المحتمل"].some(a=>k===importNormalizeKey(a)||k.includes(importNormalizeKey(a)));
   };
-  let headerIndex=-1,headers=[];
-  for(let ri=0;ri<Math.min(matrix.length,15);ri++){
-   const candidate=(matrix[ri]||[]).map(v=>String(v??"").trim());
-   if(candidate.some(isNameHeader)){headerIndex=ri;headers=candidate;break;}
-  }
-  if(headerIndex<0){
-   // Support headerless contact exports like the user's commercial leads workbook:
-   // column A = serial number, column B = phone, column C = client name.
-   const looksLikePhone=v=>{
-    const digits=String(v??"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/\\D/g,"");
-    return digits.length>=8;
-   };
-   const headerlessContacts=matrix.some(row=>row&&looksLikePhone(row[1])&&String(row[2]??"").trim().length>1);
-   if(headerlessContacts){
-    headerIndex=0;
-    headers=["Serial","Phone","Client Name"];
-   }else{
+  const looksLikePhone=v=>{
+   const digits=String(v??"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d))
+    .replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/\\D/g,"");
+   return digits.length>=8;
+  };
+  // Detect headerless contact exports first. The uploaded workbook has serial in A,
+  // phone in B, and client name in C, with several whitespace-only rows at the top.
+  const headerlessContacts=matrix.some(row=>row&&looksLikePhone(row[1])&&String(row[2]??"").trim().length>1);
+  let headerIndex=-1,headers=[],headerlessMode=headerlessContacts;
+  if(headerlessMode){
+   headers=["Serial","Phone","Client Name"];
+  }else{
+   for(let ri=0;ri<Math.min(matrix.length,30);ri++){
+    const candidate=(matrix[ri]||[]).map(v=>String(v??"").trim());
+    if(candidate.some(isNameHeader)){headerIndex=ri;headers=candidate;break;}
+   }
+   if(headerIndex<0){
     const preview=(matrix[0]||[]).slice(0,12).map(v=>String(v??"").trim()).filter(Boolean).join(" | ");
     throw new Error("Could not identify the Client Name column. No data was imported. First row found: "+(preview||"(empty)")+". Please use the Download Template or make sure your file has a column named Client Name, Name, Full Name, اسم العميل, or الاسم.");
    }
+   headers=headers.map((h,i)=>h||("Column "+(i+1)));
   }
-  headers=headers.map((h,i)=>h||("Column "+(i+1)));
-  const raw=matrix.slice(headerIndex+1).filter(row=>row.some(v=>String(v??"").trim()!=="")).map(row=>{
+  const dataStartIndex=headerlessMode?0:headerIndex+1;
+  const raw=matrix.slice(dataStartIndex).filter(row=>{
+   if(!row||!row.some(v=>String(v??"").trim()!==""))return false;
+   if(headerlessMode&&!looksLikePhone(row[1])&&!String(row[2]??"").trim())return false;
+   return true;
+  }).map(row=>{
    const obj={};headers.forEach((h,i)=>{obj[h]=row[i]??"";});return obj;
   });
-  if(!raw.length)throw new Error("The header was found, but there are no data rows underneath it.");
+  if(!raw.length)throw new Error("No client data rows were found in the first worksheet.");
   const headerMap=new Map();
   Object.keys(raw[0]).forEach(k=>headerMap.set(importNormalizeKey(k),k));
   const findValue=(row,aliases)=>{
-   for(const alias of aliases){const actual=headerMap.get(importNormalizeKey(alias));if(actual!==undefined&&row[actual]!==""&&row[actual]!==null)return row[actual];}
+   for(const alias of aliases){const actual=headerMap.get(importNormalizeKey(alias));if(actual!==undefined&&row[actual]!==null&&row[actual]!==undefined&&String(row[actual]).trim()!=="")return row[actual];}
    const wanted=aliases.map(importNormalizeKey);
    for(const [normalized,actual] of headerMap.entries()){
-    if(wanted.some(a=>a.length>=4&&(normalized.includes(a)||a.includes(normalized)))&&row[actual]!==""&&row[actual]!==null)return row[actual];
+    if(wanted.some(a=>a.length>=4&&(normalized.includes(a)||a.includes(normalized)))&&row[actual]!==null&&row[actual]!==undefined&&String(row[actual]).trim()!=="")return row[actual];
    }
    return "";
   };
@@ -470,7 +475,7 @@ $("excelFileInput").onchange=async e=>{
    const row=raw[idx];
    const name=String(findValue(row,aliases.name)||"").trim();
    const phone=String(findValue(row,aliases.phone)||"").trim();
-   if(!name){invalid++;if(errors.length<5)errors.push("Row "+(idx+headerIndex+2)+": missing client name");continue;}
+   if(!name){invalid++;if(errors.length<5)errors.push("Row "+(idx+dataStartIndex+1)+": missing client name");continue;}
    const phoneKey=importNormalizePhone(phone);
    if(phoneKey&&knownPhones.has(phoneKey)){duplicates++;continue;}
    const custom_fields={};

@@ -371,12 +371,11 @@ $("saveFields").onclick=async()=>{
 function importNormalizeKey(v){
  return String(v??"").toLowerCase().trim()
   .replace(/[أإآ]/g,"ا").replace(/ة/g,"ه")
-  .replace(/[\\s_\\-./()\\[\\]{}:]+/g,"")
-  .replace(/[^a-z0-9\\u0600-\\u06ff]/g,"");
+  .replace(/[^a-z0-9\u0600-\u06FF]/g,"");
 }
 function importNormalizePhone(v){
  return String(v??"").replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d))
-  .replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/\\D/g,"");
+  .replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/\D/g,"");
 }
 function importDateValue(v){
  if(v===null||v===undefined||v==="")return "";

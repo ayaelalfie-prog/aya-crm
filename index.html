@@ -407,17 +407,40 @@ $("excelFileInput").onchange=async e=>{
   btn.disabled=true;status.textContent="Reading Excel file...";
   const wb=XLSX.read(await file.arrayBuffer(),{type:"array",cellDates:true});
   const first=wb.SheetNames[0];if(!first)throw new Error("The file has no worksheets.");
-  const raw=XLSX.utils.sheet_to_json(wb.Sheets[first],{defval:"",raw:true});
-  if(!raw.length)throw new Error("No data rows found. Make sure the first row contains column headers.");
+  const matrix=XLSX.utils.sheet_to_json(wb.Sheets[first],{header:1,defval:"",raw:true});
+  if(!matrix.length)throw new Error("No data rows found in the first worksheet.");
+  const isNameHeader=value=>{
+   const k=importNormalizeKey(value);
+   if(!k||k.includes("project")||k.includes("مشروع"))return false;
+   return ["clientname","fullname","customername","leadname","prospectname","name","client","customer","lead","اسم العميل","اسم العميل المحتمل","اسم العميل والشركة","الاسم بالكامل","اسم","الاسم","العميل","العميل المحتمل"].some(a=>k===importNormalizeKey(a)||k.includes(importNormalizeKey(a)));
+  };
+  let headerIndex=-1,headers=[];
+  for(let ri=0;ri<Math.min(matrix.length,15);ri++){
+   const candidate=(matrix[ri]||[]).map(v=>String(v??"").trim());
+   if(candidate.some(isNameHeader)){headerIndex=ri;headers=candidate;break;}
+  }
+  if(headerIndex<0){
+   const preview=(matrix[0]||[]).slice(0,12).map(v=>String(v??"").trim()).filter(Boolean).join(" | ");
+   throw new Error("Could not identify the Client Name column. No data was imported. First row found: "+(preview||"(empty)")+". Please use the Download Template or make sure your file has a column named Client Name, Name, Full Name, اسم العميل, or الاسم.");
+  }
+  headers=headers.map((h,i)=>h||("Column "+(i+1)));
+  const raw=matrix.slice(headerIndex+1).filter(row=>row.some(v=>String(v??"").trim()!=="")).map(row=>{
+   const obj={};headers.forEach((h,i)=>{obj[h]=row[i]??"";});return obj;
+  });
+  if(!raw.length)throw new Error("The header was found, but there are no data rows underneath it.");
   const headerMap=new Map();
   Object.keys(raw[0]).forEach(k=>headerMap.set(importNormalizeKey(k),k));
   const findValue=(row,aliases)=>{
    for(const alias of aliases){const actual=headerMap.get(importNormalizeKey(alias));if(actual!==undefined&&row[actual]!==""&&row[actual]!==null)return row[actual];}
+   const wanted=aliases.map(importNormalizeKey);
+   for(const [normalized,actual] of headerMap.entries()){
+    if(wanted.some(a=>a.length>=4&&(normalized.includes(a)||a.includes(normalized)))&&row[actual]!==""&&row[actual]!==null)return row[actual];
+   }
    return "";
   };
   const aliases={
-   name:["Client Name","Name","Client","Full Name","اسم العميل","الاسم","اسم"],
-   phone:["Phone","Phone Number","Mobile","Mobile Number","Telephone","Number","رقم الهاتف","رقم التليفون","الموبايل","الهاتف","الرقم"],
+   name:["Client Name","Name","Client","Full Name","Customer Name","Lead Name","Prospect Name","اسم العميل","اسم العميل المحتمل","الاسم بالكامل","الاسم","اسم","العميل المحتمل","العميل"],
+   phone:["Phone","Phone Number","Mobile","Mobile Number","Telephone","Number","Contact Number","WhatsApp","رقم الهاتف","رقم التليفون","رقم الموبايل","الموبايل","الهاتف","الرقم","تليفون","موبايل","واتساب"],
    project:["Project","Project Name","المشروع","اسم المشروع"],
    budget:["Budget","Price","Client Budget","الميزانية","الميزانيه","السعر"],
    status:["Status","Lead Status","الحالة","الحاله","حالة العميل"],
@@ -435,7 +458,7 @@ $("excelFileInput").onchange=async e=>{
    const row=raw[idx];
    const name=String(findValue(row,aliases.name)||"").trim();
    const phone=String(findValue(row,aliases.phone)||"").trim();
-   if(!name){invalid++;if(errors.length<5)errors.push("Row "+(idx+2)+": missing client name");continue;}
+   if(!name){invalid++;if(errors.length<5)errors.push("Row "+(idx+headerIndex+2)+": missing client name");continue;}
    const phoneKey=importNormalizePhone(phone);
    if(phoneKey&&knownPhones.has(phoneKey)){duplicates++;continue;}
    const custom_fields={};

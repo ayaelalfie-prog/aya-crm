@@ -17,6 +17,24 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 @media(max-width:850px){.app{display:block}.side{width:100%;height:auto;position:static;border-right:0;border-bottom:1px solid var(--border);padding:14px 16px}.nav{display:flex;overflow:auto;gap:6px}.nav button{white-space:nowrap;flex:0 0 auto;width:auto;margin:0;padding:10px 12px}.logout{display:none}.main{padding:20px 16px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}}
 .wa-link{color:#128c7e;text-decoration:none;font-weight:700}.wa-link:hover{text-decoration:underline}@media(max-width:520px){.cards{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}.top .primary{width:100%}.field-row{grid-template-columns:1fr;gap:8px}.form-grid{grid-template-columns:1fr}.auth-card{padding:24px}}
 :focus-visible{outline:3px solid #bcb7ff;outline-offset:2px}button:disabled{opacity:.65;cursor:wait}
+
+/* Report-style client form polish; preserves existing fields and stored data */
+#clientForm .modal-head h2{font-size:24px;font-weight:700;color:#51566d;margin:0}
+#clientForm .modal-head{padding-bottom:14px;border-bottom:1px solid #e8eaf0;margin-bottom:16px}
+#clientForm .form-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 24px}
+#clientForm .field{margin:8px 0}
+#clientForm .field label{font-size:15px;color:#171923;margin-bottom:8px}
+#clientForm .field input,#clientForm .field select,#clientForm .field textarea{border:1px solid #dedfe5;border-radius:11px;min-height:48px;padding:12px 15px;box-shadow:0 2px 7px #1d2a4a0a;font-size:15px}
+#clientForm .field textarea{min-height:90px}
+#clientForm #followupQuickChoices{display:flex;flex-direction:row;flex-wrap:wrap;overflow:visible;gap:7px;margin-top:8px;padding:0}
+#clientForm #followupQuickChoices button{border:0;border-radius:15px;background:#eaf0f6;color:#416a9b;padding:10px 14px;font-size:13px;box-shadow:none;white-space:nowrap}
+#clientForm #followupQuickChoices button:nth-child(2){background:#e8f5ff;color:#31a8f3}
+#clientForm #followupQuickChoices button:nth-child(3){background:#edf3f6;color:#517da0}
+#clientForm #followupQuickChoices button:nth-child(4){background:#fff0f0;color:#ef514b}
+#clientForm #followupQuickChoices button:nth-child(5){background:#e6f4fa;color:#2775a8}
+#clientForm .primary[type="submit"]{margin-top:12px;min-height:48px}
+@media(max-width:760px){#clientForm .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px}}
+@media(max-width:520px){#clientForm .form-grid{grid-template-columns:1fr}}
 </style></head>
 <body>
 <div id="auth" class="auth"><div class="auth-card"><div class="logo">CRM</div><div class="sub">Manage your clients and follow-up appointments from any device</div>

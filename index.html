@@ -35,6 +35,8 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 #clientForm .primary[type="submit"]{margin-top:12px;min-height:48px}
 @media(max-width:760px){#clientForm .form-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px}}
 @media(max-width:520px){#clientForm .form-grid{grid-template-columns:1fr}}
+
+.client-name-link:hover{text-decoration:underline;color:#5148d8!important}
 </style></head>
 <body>
 <div id="auth" class="auth"><div class="auth-card"><div class="logo">CRM</div><div class="sub">Manage your clients and follow-up appointments from any device</div>
@@ -232,7 +234,7 @@ function render(){
  });
  const summary=$("filterSummary");if(summary)summary.textContent=filtered.length+" of "+clients.length+" clients";
 
- $("clientsBody").innerHTML=filtered.map(c=>'<tr><td><b>'+esc(c.name)+'</b></td><td>'+esc(c.phone||"—")+'</td><td>'+esc(c.project||"—")+'</td><td>'+badge(c.status)+'</td><td>'+wa(c.phone,c.id,c.name)+'</td><td><div class="row-actions"><button class="secondary" onclick="editClient(\''+c.id+'\')">Edit</button><button class="danger" onclick="deleteClient(\''+c.id+'\')">Delete</button></div></td></tr>').join("")||'<tr><td colspan="6"><div class="empty">No clients found</div></td></tr>';
+ $("clientsBody").innerHTML=filtered.map(c=>'<tr><td><button type="button" class="client-name-link" onclick="editClient(\''+c.id+'\')" title="Edit client" style="padding:0;background:transparent;border:0;color:var(--primary);font-weight:700;text-align:left;cursor:pointer">'+esc(c.name)+'</button></td><td>'+esc(c.phone||"—")+'</td><td>'+esc(c.project||"—")+'</td><td>'+badge(c.status)+'</td><td>'+wa(c.phone,c.id,c.name)+'</td><td><div class="row-actions"><button class="secondary" onclick="editClient(\''+c.id+'\')">Edit</button><button class="danger" onclick="deleteClient(\''+c.id+'\')">Delete</button></div></td></tr>').join("")||'<tr><td colspan="6"><div class="empty">No clients found</div></td></tr>';
  const cancelQ=($("cancelSearch")?.value||"").trim().toLowerCase();
  const canceled=clients.filter(c=>isCanceled(c)&&(!cancelQ||(String(c.name||"")+" "+String(c.phone||"")+" "+String(c.project||"")).toLowerCase().includes(cancelQ)));
  const cancelSummary=$("cancelSummary");if(cancelSummary)cancelSummary.textContent=canceled.length+" canceled clients";

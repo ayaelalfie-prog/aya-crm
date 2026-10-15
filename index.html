@@ -336,7 +336,7 @@ $("clientForm").onsubmit=async e=>{
    if(r.error)throw new Error("Unable to add client: "+r.error.message);
    client=r.data;
   }
-  await logActivity(client.id,id?"client_updated":"client_added",id?"Updated client: "+client.name:"Added new client: "+client.name);
+  if(id)await logActivity(client.id,"client_updated","Updated client: "+client.name);
   if(id&&previousClient&&previousClient.status!==client.status)await logActivity(client.id,"status_changed","Changed status for "+client.name+" to "+(statusText[client.status]||client.status));
   const followDate=$("fDate").value;
   const followNote=$("fNote").value.trim()||null;

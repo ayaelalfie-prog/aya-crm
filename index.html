@@ -23,7 +23,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 <div id="authForm"><div class="field"><label>Email</label><input id="email" type="email" placeholder="name@example.com"></div><div class="field"><label>Password</label><input id="password" type="password" placeholder="••••••••"></div><button id="loginBtn" class="primary" style="width:100%">Login</button><button id="signupBtn" class="secondary" style="width:100%;margin-top:8px">Create New Account</button><p id="authMsg" class="muted"></p></div></div></div>
 <div id="app" class="app hidden"><aside class="side"><div class="brand">CRM</div><div class="nav"><button data-page="dashboard" class="active" type="button" onclick="showPage('dashboard')">🏠 Dashboard</button><button data-page="clients" onclick="showPage('clients')">👥 Clients</button><button data-page="cancelation" onclick="showPage('cancelation')">📁 Cancelation</button><button data-page="followups" onclick="showPage('followups')">⏰ Follow-ups</button><button data-page="settings" onclick="showPage('settings')">⚙️ Fields</button><button data-page="backups" onclick="showPage('backups')">💾 Backups</button></div><button id="logout" class="logout">Logout</button></aside>
 <main class="main"><div class="top"><div><h1 id="pageTitle">Dashboard</h1><div class="muted">Real Estate Client & Follow-up Management</div></div><button id="addBtn" class="primary">+ Add Client</button></div>
-<section id="dashboard" class="page"><div class="cards"><div class="card"><div class="muted">Total Clients</div><div id="mTotal" class="metric">0</div></div><div class="card"><div class="muted">Today’s Follow-ups</div><div id="mToday" class="metric">0</div></div><div class="card"><div class="muted">Overdue Follow-ups</div><div id="mLate" class="metric">0</div></div><div class="card"><div class="muted">Interested Leads</div><div id="mInterested" class="metric">0</div></div></div>
+<section id="dashboard" class="page"><div class="cards"><div class="card"><div class="muted">Total Clients</div><div id="mTotal" class="metric">0</div></div><div class="card"><div class="muted">Today’s Follow-ups</div><div id="mToday" class="metric">0</div></div><div class="card"><div class="muted">Overdue Follow-ups</div><div id="mLate" class="metric">0</div></div><div class="card"><div class="muted">Interested Leads</div><div id="mInterested" class="metric">0</div></div><div class="card"><div class="muted">Actions Today</div><div id="mActionsToday" class="metric">0</div><div class="muted">Calls, edits, new clients, notes & follow-ups</div></div></div>
 <div class="grid"><div class="section"><h2>Upcoming Follow-ups</h2><div id="dashFollowups"></div></div><div class="section"><h2>Recent Clients</h2><div id="dashClients"></div></div></div></section>
 <section id="clients" class="page hidden"><div class="section"><div class="toolbar"><input id="search" placeholder="Search by name, phone, or project"><button class="secondary" id="importExcelBtn" type="button">⬆ Import Excel</button><button class="secondary" id="downloadTemplateBtn" type="button">⬇ Download Template</button><input id="excelFileInput" type="file" accept=".xlsx,.xls,.csv" hidden><button class="secondary" id="addBtn2">+ Add Client</button></div><div id="importStatus" class="muted" style="margin:8px 0 12px" role="status" aria-live="polite"></div><div class="toolbar" style="margin-top:10px;align-items:end"><div class="field" style="flex:1;min-width:160px;margin:0"><label for="registeredFrom">Registered from</label><input id="registeredFrom" type="date"></div><div class="field" style="flex:1;min-width:160px;margin:0"><label for="registeredTo">Registered to</label><input id="registeredTo" type="date"></div><div class="field" style="flex:1;min-width:190px;margin:0"><label for="leadFilter">Lead / follow-up filter</label><select id="leadFilter"><option value="all">All Leads</option><option value="overdue">Overdue Follow-up</option><option value="followup">Has Follow-up</option><option value="no_followup">No Follow-up</option><option value="no_response">No Response</option></select></div><button class="secondary" type="button" id="clearClientFilters">Clear Filters</button></div><div id="filterSummary" class="muted" style="margin:8px 0 12px"></div><div class="table-wrap"><table class="table"><thead><tr><th>Client</th><th>Phone</th><th>Project</th><th>Status</th><th>Actions</th></tr></thead><tbody id="clientsBody"></tbody></table></div></div></section>
 <section id="cancelation" class="page hidden"><div class="section"><div class="toolbar"><input id="cancelSearch" placeholder="Search canceled clients by name, phone, or project"></div><div class="muted" id="cancelSummary" style="margin:8px 0 12px"></div><div class="table-wrap"><table class="table"><thead><tr><th>Client</th><th>Phone</th><th>Project</th><th>Reason</th><th>WhatsApp</th><th>Actions</th></tr></thead><tbody id="cancelationBody"></tbody></table></div></div></section><section id="followups" class="page hidden"><div class="section"><div class="toolbar"><select id="filterFollow"><option value="all">All Follow-ups</option><option value="open">Open</option><option value="done">Completed</option></select></div><div id="followupsList"></div></div></section>
@@ -79,8 +79,13 @@ window.addEventListener("error",e=>{const m=document.getElementById("authMsg");i
 const SUPABASE_URL="https://flnbcyhgmhvoctibhdqz.supabase.co";
 const SUPABASE_KEY="sb_publishable_4oUbQU3Lq7RfGdRADTjXhQ_Cj61_FRr";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let user=null, clients=[], followups=[], fields=[], clientComments=[];
+let user=null, clients=[], followups=[], fields=[], clientComments=[], activities=[];
 const $=id=>document.getElementById(id);
+async function logActivity(clientId,actionType,description){
+ if(!user?.id)return;
+ try{const r=await sb.from("crm_activities").insert({user_id:user.id,client_id:clientId||null,action_type:actionType||"action",description});if(r.error){console.warn("Activity could not be logged:",r.error.message);return;}activities.unshift(r.data||{client_id:clientId,action_type:actionType,description,created_at:new Date().toISOString()});renderActivityCount();}catch(e){console.warn("Activity could not be logged:",e);}
+}
+function renderActivityCount(){const el=$("mActionsToday");if(!el)return;const now=new Date(),start=new Date(now);start.setHours(0,0,0,0);const end=new Date(start);end.setDate(end.getDate()+1);el.textContent=activities.filter(a=>{const d=new Date(a.created_at);return d>=start&&d<end;}).length;}
 const earlyLoginBtn=$("loginBtn"), earlyAuthMsg=$("authMsg");
 if(earlyLoginBtn){
  earlyLoginBtn.type="button";
@@ -152,6 +157,8 @@ async function load(){
  const cm=await sb.from("client_comments").select("*").eq("user_id",user.id).order("created_at",{ascending:false});
  if(cm.error){console.warn("Unable to load client comments:",cm.error.message);clientComments=[]}
  else clientComments=cm.data||[];
+ const ar=await sb.from("crm_activities").select("*").eq("user_id",user.id).gte("created_at",new Date(new Date().setHours(0,0,0,0)).toISOString()).order("created_at",{ascending:false});
+ activities=ar.error?[]:(ar.data||[]);
  const f=await sb.from("followups").select("*").eq("user_id",user.id).order("followup_at",{ascending:true});
  if(f.error){console.warn("Unable to load follow-ups:",f.error.message);followups=[]}
  else{
@@ -182,6 +189,7 @@ function render(){
  $("mTotal").textContent=clients.length; $("mToday").textContent=followups.filter(x=>!x.completed&&new Date(x.followup_at)>=start&&new Date(x.followup_at)<end).length;
  $("mLate").textContent=followups.filter(x=>!x.completed&&new Date(x.followup_at)<now).length;
  $("mInterested").textContent=clients.filter(x=>x.status==="interested").length;
+ renderActivityCount();
  $("dashClients").innerHTML=clients.slice(0,6).map(c=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+esc(c.name)+'</b><div class="muted">'+esc(c.project||"—")+' · '+badge(c.status)+'</div></div>').join("")||'<div class="empty">No clients yet</div>';
  $("dashFollowups").innerHTML=followups.filter(x=>!x.completed).slice(0,6).map(f=>'<div style="padding:10px 0;border-bottom:1px solid #eee"><b>'+esc(f.clients?.name||"Client")+'</b><div class="muted">'+fmt(f.followup_at)+(new Date(f.followup_at)<now?' · <span style="color:#d34b4b">Overdue</span>':"")+'</div></div>').join("")||'<div class="empty">No follow-ups</div>';
  const q=($("search")?.value||"").trim().toLowerCase();
@@ -230,7 +238,7 @@ async function loadClientComments(clientId){
  box.innerHTML=rows.map(x=>`<div class="card" style="padding:10px"><div style="font-size:12px;color:#718096">${fmt(x.created_at)}</div><div style="margin-top:4px">${esc(x.comment)}</div><button type="button" class="danger" style="margin-top:7px" onclick="deleteComment('${x.id}')">Delete</button></div>`).join('')||'<div class="muted">No comments yet.</div>';
 }
 window.deleteComment=async id=>{if(!confirm("Delete comment?"))return;const r=await sb.from("client_comments").delete().eq("id",id).eq("user_id",user.id);if(r.error)return alert("Unable to delete comment");clientComments=clientComments.filter(x=>x.id!==id);await loadClientComments($("clientId").value)};
-$("addCommentBtn").onclick=async()=>{const clientId=$("clientId").value, input=$("newComment"), comment=input.value.trim();if(!clientId)return alert("Save the client first, then add a comment.");if(!comment)return;const r=await sb.from("client_comments").insert({user_id:user.id,client_id:clientId,comment}).select().single();if(r.error)return alert("Unable to add comment");clientComments.unshift(r.data);input.value="";await loadClientComments(clientId)};
+$("addCommentBtn").onclick=async()=>{const clientId=$("clientId").value, input=$("newComment"), comment=input.value.trim();if(!clientId)return alert("Save the client first, then add a comment.");if(!comment)return;const r=await sb.from("client_comments").insert({user_id:user.id,client_id:clientId,comment}).select().single();if(r.error)return alert("Unable to add comment");clientComments.unshift(r.data);await logActivity(clientId,"note_added","Added a note to "+(clients.find(c=>c.id===clientId)?.name||"client"));input.value="";await loadClientComments(clientId)};
 
 function renderStatusOptions(selected){
  const sel=$("cStatus"); if(!sel)return;
@@ -316,6 +324,7 @@ $("clientForm").onsubmit=async e=>{
     }
    }
   }
+  const previousClient=id?clients.find(x=>x.id===id):null;
   let client;
   if(id){
    const r=await sb.from("clients").update({...payload,user_id:undefined}).eq("id",id).eq("user_id",user.id).select("*").single();
@@ -326,11 +335,14 @@ $("clientForm").onsubmit=async e=>{
    if(r.error)throw new Error("Unable to add client: "+r.error.message);
    client=r.data;
   }
+  await logActivity(client.id,id?"client_updated":"client_added",id?"Updated client: "+client.name:"Added new client: "+client.name);
+  if(id&&previousClient&&previousClient.status!==client.status)await logActivity(client.id,"status_changed","Changed status for "+client.name+" to "+(statusText[client.status]||client.status));
   const followDate=$("fDate").value;
   const followNote=$("fNote").value.trim()||null;
   if(followDate){
    const fr=await sb.from("followups").insert({user_id:user.id,client_id:client.id,followup_at:new Date(followDate).toISOString(),note:followNote,completed:false});
    if(fr.error)throw new Error("Client saved, but follow-up could not be saved: "+fr.error.message);
+   await logActivity(client.id,"followup_scheduled","Scheduled a follow-up for "+client.name);
   }
   // Update the list immediately from the saved client, even if a secondary data load fails.
   if(id){

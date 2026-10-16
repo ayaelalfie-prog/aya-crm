@@ -155,6 +155,18 @@ input:focus,select:focus,textarea:focus{border-color:#928bfa!important;box-shado
 #cancelation .toolbar>*{min-width:0}
 #cancelation .table-wrap{margin-top:8px}
 @media(max-width:760px){#followupsList{grid-template-columns:1fr}#cancelation .toolbar{grid-template-columns:1fr}#followups #filterFollow{width:100%}}
+
+/* Strong layout reset for page content */
+.main{display:block!important;align-self:stretch!important;min-height:100vh}
+.page{display:block;width:100%;height:auto;min-height:0;position:relative;inset:auto;float:none;clear:both;transform:none}
+.page.hidden{display:none!important}
+#followups,#cancelation{width:100%;margin:0!important;padding:0!important;top:auto!important;bottom:auto!important;left:auto!important;right:auto!important;transform:none!important}
+#followups>.section,#cancelation>.section{margin:0!important;width:100%;height:auto!important;min-height:0!important;position:static!important;float:none!important;transform:none!important}
+#followupsList{position:static!important;inset:auto!important;transform:none!important;margin:14px 0 0!important;display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:14px;align-content:start;align-items:start}
+#followupsList>.card{position:static!important;inset:auto!important;transform:none!important;margin:0!important;align-self:start!important;height:auto!important}
+#cancelation .table-wrap{position:static!important;margin:12px 0 0!important}
+#cancelation .toolbar{position:static!important}
+@media(max-width:760px){#followupsList{grid-template-columns:minmax(0,1fr)!important}#cancelation .toolbar{grid-template-columns:minmax(0,1fr)!important}}
 </style></head>
 <body>
 <div id="auth" class="auth"><div class="auth-card"><div class="logo">CRM</div><div class="sub">Manage your clients and follow-up appointments from any device</div>

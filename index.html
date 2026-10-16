@@ -202,7 +202,7 @@ function renderFields(){
   const deleteBtn=f.is_system?"":`<button class="danger" onclick="deleteField('${f.id}')">Delete</button>`;
   return `<div class="field-row" style="grid-template-columns:1.3fr 1fr auto auto;flex-wrap:wrap"><input data-field-label="${esc(f.id)}" value="${esc(f.label)}"><span class="type-pill">${type}</span><span class="muted">${f.is_system?"System":"Custom"}</span>${f.is_system?"<span></span>":deleteBtn}${optionsEditor}</div>`;
  }).join("");
- $("clients").querySelector("thead").innerHTML='<tr><th>'+fieldLabel("name","Client")+'</th><th>'+fieldLabel("phone","Phone")+'</th><th>'+fieldLabel("project","Project")+'</th><th>'+fieldLabel("status","Status")+'</th><th>Actions</th></tr>';
+ $("clients").querySelector("thead").innerHTML='<tr><th>'+fieldLabel("name","Client")+'</th><th>'+fieldLabel("phone","Phone")+' <span title="WhatsApp" style="color:#25D366;font-size:14px">●</span></th><th>'+fieldLabel("project","Project")+'</th><th>'+fieldLabel("status","Status")+'</th><th>Actions</th></tr>';
 }
 function render(){
  const now=new Date(), start=new Date(); start.setHours(0,0,0,0); const end=new Date(start); end.setDate(end.getDate()+1);

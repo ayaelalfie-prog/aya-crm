@@ -167,6 +167,17 @@ input:focus,select:focus,textarea:focus{border-color:#928bfa!important;box-shado
 #cancelation .table-wrap{position:static!important;margin:12px 0 0!important}
 #cancelation .toolbar{position:static!important}
 @media(max-width:760px){#followupsList{grid-template-columns:minmax(0,1fr)!important}#cancelation .toolbar{grid-template-columns:minmax(0,1fr)!important}}
+
+/* Layout correction: keep navigation and active page in the same top-aligned row */
+#app.app{display:flex!important;align-items:stretch!important;min-height:100vh;height:auto}
+#app>.side{position:sticky!important;top:0!important;align-self:flex-start!important;height:100vh!important;min-height:100vh;flex:0 0 248px}
+#app>.main{display:block!important;flex:1 1 auto!important;align-self:stretch!important;width:auto!important;min-width:0;max-width:none!important;margin:0!important;padding:32px!important}
+#app>.main>.top{display:flex!important;position:relative!important;top:auto!important;margin:0 0 22px!important}
+#app>.main>.page{position:relative!important;top:auto!important;left:auto!important;right:auto!important;bottom:auto!important;transform:none!important;float:none!important;clear:both!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important}
+#app>.main>.page.hidden{display:none!important}
+#app>.main>#followups,#app>.main>#cancelation{display:block;width:100%;align-self:auto}
+#app>.main>#followups>.section,#app>.main>#cancelation>.section{position:relative!important;top:auto!important;margin:0!important;width:100%;height:auto!important;min-height:0!important}
+@media(max-width:850px){#app.app{display:block!important}#app>.side{position:relative!important;top:auto!important;width:100%!important;height:auto!important;min-height:0;display:block}#app>.main{padding:20px 16px!important;width:100%!important}}
 </style></head>
 <body>
 <div id="auth" class="auth"><div class="auth-card"><div class="logo">CRM</div><div class="sub">Manage your clients and follow-up appointments from any device</div>

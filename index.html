@@ -178,6 +178,8 @@ input:focus,select:focus,textarea:focus{border-color:#928bfa!important;box-shado
 #app>.main>#followups,#app>.main>#cancelation{display:block;width:100%;align-self:auto}
 #app>.main>#followups>.section,#app>.main>#cancelation>.section{position:relative!important;top:auto!important;margin:0!important;width:100%;height:auto!important;min-height:0!important}
 @media(max-width:850px){#app.app{display:block!important}#app>.side{position:relative!important;top:auto!important;width:100%!important;height:auto!important;min-height:0;display:block}#app>.main{padding:20px 16px!important;width:100%!important}}
+
+html,body{scroll-padding-top:0}body{overflow-anchor:none}#app>.main{overflow-y:visible;scroll-behavior:auto}#app>.main>.top{margin-top:0!important}#app>.main>.page{margin-block-start:0!important;scroll-margin-top:0}
 </style></head>
 <body>
 <div id="auth" class="auth"><div class="auth-card"><div class="logo">CRM</div><div class="sub">Manage your clients and follow-up appointments from any device</div>
@@ -725,7 +727,7 @@ window.openDashboardCard=function(kind){
  else $("statusFilter").value="all";
  render();
 };
-window.showPage=async function(page){document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));const target=document.getElementById(page);if(target)target.classList.remove("hidden");const btn=document.querySelector(".nav button[data-page=\""+page+"\"]");if(btn)document.getElementById("pageTitle").textContent=btn.textContent.replace(/^\S+\s*/,"");if(page==="backups")await loadBackups();};
+window.showPage=async function(page){document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));const target=document.getElementById(page);if(target)target.classList.remove("hidden");const btn=document.querySelector(".nav button[data-page=\""+page+"\"]");if(btn)document.getElementById("pageTitle").textContent=btn.textContent.replace(/^\S+\s*/,"");window.scrollTo({top:0,left:0,behavior:"auto"});const main=document.querySelector("#app>.main");if(main)main.scrollTop=0;if(page==="backups")await loadBackups();};
 
 $("signupBtn").onclick=async()=>{
  try{

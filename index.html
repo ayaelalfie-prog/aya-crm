@@ -180,6 +180,17 @@ input:focus,select:focus,textarea:focus{border-color:#928bfa!important;box-shado
 @media(max-width:850px){#app.app{display:block!important}#app>.side{position:relative!important;top:auto!important;width:100%!important;height:auto!important;min-height:0;display:block}#app>.main{padding:20px 16px!important;width:100%!important}}
 
 html,body{scroll-padding-top:0}body{overflow-anchor:none}#app>.main{overflow-y:visible;scroll-behavior:auto}#app>.main>.top{margin-top:0!important}#app>.main>.page{margin-block-start:0!important;scroll-margin-top:0}
+
+/* Final fix: keep every page section inside the content column and at the top */
+#app.app{display:grid!important;grid-template-columns:248px minmax(0,1fr)!important;grid-template-rows:minmax(100vh,auto)!important;align-items:start!important;min-height:100vh!important;height:auto!important}
+#app>.side{grid-column:1;grid-row:1;position:sticky!important;top:0!important;width:248px!important;height:100vh!important;min-height:100vh!important;align-self:start!important}
+#app>main.main{grid-column:2;grid-row:1;display:block!important;box-sizing:border-box;width:100%!important;max-width:none!important;min-width:0!important;min-height:100vh!important;height:auto!important;margin:0!important;padding:28px!important;align-self:start!important;overflow:visible!important}
+#app>main.main>.top{margin:0 0 22px!important;min-height:74px;align-items:flex-start!important}
+#app>main.main>.page{display:block;position:static!important;box-sizing:border-box;width:100%!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;transform:none!important;float:none!important}
+#app>main.main>.page.hidden{display:none!important}
+#app>main.main>.page>.section{box-sizing:border-box;width:100%!important;margin:0!important;min-height:0!important;height:auto!important;position:static!important}
+#app>main.main>#followups #followupsList{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:14px;align-content:start}
+@media(max-width:850px){#app.app{display:block!important}#app>.side{position:relative!important;width:100%!important;height:auto!important;min-height:0!important}#app>main.main{width:100%!important;min-height:0!important;padding:18px 14px!important}#app>main.main>.top{min-height:0}}
 </style></head>
 <body>
 <div id="auth" class="auth"><div class="auth-card"><div class="logo">CRM</div><div class="sub">Manage your clients and follow-up appointments from any device</div>

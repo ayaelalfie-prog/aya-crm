@@ -332,6 +332,7 @@ $("clientForm").onsubmit=async e=>{
   const id=$("clientId").value.trim();
   const custom_fields={};
   document.querySelectorAll("[data-custom-key]").forEach(el=>{custom_fields[el.dataset.customKey]=el.value;});
+  custom_fields.phone2=$("cPhone2").value.trim()||"";
   const payload={
    user_id:user.id,
    name:$("cName").value.trim(),

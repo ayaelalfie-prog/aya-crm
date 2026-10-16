@@ -141,6 +141,20 @@ input:focus,select:focus,textarea:focus{border-color:#928bfa!important;box-shado
  #clients .toolbar>*{width:100%}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Fix Follow-ups and Cancelation pages rendering at the top */
+#followups.page,#cancelation.page{display:block;align-self:flex-start;min-height:0;height:auto;margin:0;padding:0}
+#followups>.section,#cancelation>.section{display:block;position:relative;top:auto;margin:0;align-self:flex-start;width:100%;min-height:0;height:auto}
+#followupsList{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:12px;align-items:start;margin-top:12px}
+#followupsList>.card{margin:0!important;min-width:0;align-self:start;display:block;height:auto}
+#followupsList>.card>div:first-child{align-items:flex-start;flex-wrap:wrap}
+#followupsList>.card p{overflow-wrap:anywhere;white-space:normal;line-height:1.55;margin:14px 0}
+#followups .toolbar{display:flex;justify-content:flex-start;align-items:center;margin-bottom:14px}
+#followups #filterFollow{width:min(100%,300px);min-height:44px}
+#cancelation .toolbar{display:grid;grid-template-columns:minmax(220px,2fr) minmax(180px,1fr) auto;align-items:end}
+#cancelation .toolbar>*{min-width:0}
+#cancelation .table-wrap{margin-top:8px}
+@media(max-width:760px){#followupsList{grid-template-columns:1fr}#cancelation .toolbar{grid-template-columns:1fr}#followups #filterFollow{width:100%}}
 </style></head>
 <body>
 <div id="auth" class="auth"><div class="auth-card"><div class="logo">CRM</div><div class="sub">Manage your clients and follow-up appointments from any device</div>

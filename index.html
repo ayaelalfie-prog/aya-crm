@@ -58,6 +58,89 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;border:0}.hidden
 #cancelation .row-actions button{white-space:nowrap;border:1px solid #dedcff;background:#f2f1ff;color:#5c54dc;border-radius:9px;padding:9px 12px;font-weight:700}
 #cancelation .row-actions button:hover{background:#e7e5ff}
 @media(max-width:760px){#cancelation .section{padding:15px;border-radius:15px}#cancelation .section>div:first-child{padding:15px;margin:0 0 15px}#cancelation .section h2{font-size:20px}#cancelation .toolbar{grid-template-columns:1fr;padding:12px;gap:8px}#cancelation #clearCancelFilters{align-self:stretch}}
+
+/* Global consistency and responsive layout pass */
+:root{--bg:#f5f7fc;--card:#fff;--text:#20243a;--muted:#737d91;--primary:#6558e8;--border:#e4e8f1;--danger:#dc555d;--ok:#15956a}
+html{scroll-behavior:smooth}body{line-height:1.45;-webkit-font-smoothing:antialiased}
+button{transition:background .16s ease,color .16s ease,border-color .16s ease,transform .16s ease;line-height:1.25}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #9d97ff;outline-offset:2px}
+button:disabled{opacity:.65;cursor:wait}
+input,select,textarea{color:var(--text);max-width:100%;min-width:0}
+input::placeholder,textarea::placeholder{color:#9aa3b3}
+input:focus,select:focus,textarea:focus{border-color:#928bfa!important;box-shadow:0 0 0 3px #6558e817}
+.primary{background:var(--primary);box-shadow:0 3px 8px #6558e81c}
+.primary:hover{background:#5548d6;transform:translateY(-1px)}
+.secondary{border:1px solid #e2e2fb;background:#f1f0ff}
+.secondary:hover{background:#e7e5ff}
+.danger:hover{background:#ffe4e5}
+.app{min-height:100vh}
+.side{z-index:20;flex-shrink:0}
+.main{padding:clamp(16px,2.5vw,32px);overflow-x:hidden}
+.top{flex-wrap:wrap}
+.top h1{overflow-wrap:anywhere}
+.section,.card,.auth-card,.modal-card{min-width:0}
+.section{padding:clamp(15px,2vw,24px);border-radius:18px}
+.section h2{line-height:1.3}
+.toolbar{align-items:end}
+.toolbar>*,.field{min-width:0}
+.field input,.field select,.field textarea{min-height:44px}
+.table-wrap{max-width:100%;overflow:auto;border-radius:12px}
+.table{width:100%;border-collapse:separate;border-spacing:0}
+.table th{position:sticky;top:0;z-index:1}
+.table th,.table td{vertical-align:middle}
+.table tbody tr:hover{background:#fafaff}
+.row-actions{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.row-actions button{max-width:100%}
+.badge,.status-badge{white-space:nowrap}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+.form-grid{align-items:start;gap:14px}
+.form-grid>.field{margin:0}
+.modal{padding:16px;overflow:auto}
+.modal-card{width:min(760px,100%);max-height:calc(100vh - 32px);overflow:auto;border-radius:20px}
+.modal-head{position:sticky;top:0;z-index:3;background:#fff}
+#clientForm{padding-bottom:8px}
+#clientForm .field label{font-weight:600}
+#clientForm input,#clientForm select,#clientForm textarea{min-height:44px}
+#clients .section,#followups .section,#settings .section,#backups .section,#dashboard .section{overflow:hidden}
+#clients .toolbar input,#clients .toolbar select,#followups select,#backups input[type=file]{min-height:43px}
+#settings .field-row{gap:12px;min-width:0}
+#settings .field-row input,#settings .field-row select{min-width:0;max-width:100%}
+#backups .toolbar{align-items:center}
+#backups input[type=file]{max-width:100%}
+@media(max-width:900px){
+ .side{flex-basis:205px;width:205px;padding:18px 12px}
+ .main{padding:18px}
+ .grid{grid-template-columns:1fr}
+ .cards{grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px}
+ .card{padding:16px}
+ .field-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+}
+@media(max-width:640px){
+ .app{display:block}
+ .side{position:relative;top:auto;width:100%;height:auto;padding:12px;border-right:0;border-bottom:1px solid var(--border);box-shadow:0 3px 16px #1d2a4a08}
+ .brand{font-size:20px;margin:0 0 8px;padding:0 5px}
+ .nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:thin}
+ .nav button{flex:0 0 auto;width:auto;margin:0;padding:10px 12px;white-space:nowrap}
+ .logout{width:auto;margin:8px 0 0;padding:9px 12px}
+ .main{padding:14px}
+ .top{align-items:flex-start;margin-bottom:15px}
+ .top h1{font-size:23px}
+ .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .metric{font-size:24px}
+ .card{padding:13px;border-radius:14px}
+ .section{padding:14px;border-radius:15px}
+ .toolbar{gap:8px}
+ .toolbar>*{width:100%;flex:1 1 100%}
+ .toolbar button{width:100%}
+ .form-grid{grid-template-columns:1fr!important;gap:8px}
+ .field-row{grid-template-columns:1fr}
+ .modal{padding:8px}
+ .modal-card{max-height:calc(100vh - 16px);border-radius:15px}
+ .table th,.table td{padding:11px 12px}
+ #clients .toolbar{display:grid;grid-template-columns:1fr}
+ #clients .toolbar>*{width:100%}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style></head>
 <body>
 <div id="auth" class="auth"><div class="auth-card"><div class="logo">CRM</div><div class="sub">Manage your clients and follow-up appointments from any device</div>

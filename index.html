@@ -306,7 +306,7 @@ async function ensureFields(){
   if(ins.error)throw new Error("Error creating system fields: "+ins.error.message);
   fields=ins.data||[];
  }else{
-  fields=existing.filter(x=>x.is_active!==false);
+  fields=existing;
   const byKey=new Map(fields.map(x=>[x.field_key,x]));
   const missing=defaults.filter(x=>!byKey.has(x[0])).map(x=>({user_id:user.id,field_key:x[0],label:x[1],field_type:x[2],is_system:x[3],sort_order:x[4],options:x[5],is_active:true}));
   if(missing.length){
@@ -367,7 +367,7 @@ function renderFields(){
   const deleteBtn=f.is_system?"":`<button class="danger" onclick="deleteField('${f.id}')">Delete</button>`;
   return `<div class="field-row" style="grid-template-columns:1.3fr 1fr auto auto;flex-wrap:wrap"><input data-field-label="${esc(f.id)}" value="${esc(f.label)}"><span class="type-pill">${type}</span><span class="muted">${f.is_system?"System":"Custom"}</span>${f.is_system?"<span></span>":deleteBtn}${optionsEditor}</div>`;
  }).join("");
- $("clients").querySelector("thead").innerHTML='<tr><th>'+fieldLabel("name","Client")+'</th><th>'+fieldLabel("phone","Phone")+' / WhatsApp</th><th>'+fieldLabel("project","Project")+'</th><th>'+fieldLabel("status","Status")+'</th>'+fields.filter(f=>f.is_active!==false&&!["name","phone","phone2","project","status"].includes(f.field_key)).map(f=>'<th>'+esc(f.label)+'</th>').join("")+'<th>Actions</th></tr>';
+ $("clients").querySelector("thead").innerHTML='<tr><th>'+fieldLabel("name","Client")+'</th><th>'+fieldLabel("phone","Phone")+' / WhatsApp</th><th>'+fieldLabel("project","Project")+'</th><th>'+fieldLabel("status","Status")+'</th>'+fields.filter(f=>!["name","phone","phone2","project","status"].includes(String(f.field_key||"").toLowerCase())).map(f=>'<th>'+esc(f.label)+'</th>').join("")+'<th>Actions</th></tr>';
 }
 function render(){
  const now=new Date(), start=new Date(); start.setHours(0,0,0,0); const end=new Date(start); end.setDate(end.getDate()+1);
@@ -405,7 +405,7 @@ function render(){
  });
  const summary=$("filterSummary");if(summary)summary.textContent=filtered.length+" of "+clients.length+" clients";
 
- $("clientsBody").innerHTML=filtered.map(c=>'<tr><td><button type="button" class="client-name-link" onclick="editClient(\''+c.id+'\')" title="Edit client" style="padding:0;background:transparent;border:0;color:var(--primary);font-weight:700;text-align:left;cursor:pointer">'+esc(c.name)+'</button></td><td><span>'+esc(c.phone||"—")+'</span> '+wa(c.phone,c.id,c.name)+'</td><td>'+esc(c.project||"—")+'</td><td>'+badge(c.status)+'</td>'+fields.filter(f=>f.is_active!==false&&!["name","phone","phone2","project","status"].includes(f.field_key)).map(f=>'<td>'+esc((c[f.field_key]??(c.custom_fields||{})[f.field_key])??"—")+'</td>').join("")+'<td><div class="row-actions"><button class="secondary" onclick="editClient(\''+c.id+'\')">Edit</button><button class="danger" onclick="deleteClient(\''+c.id+'\')">Delete</button></div></td></tr>').join("")||'<tr><td colspan="'+(5+fields.filter(f=>f.is_active!==false&&!["name","phone","phone2","project","status"].includes(f.field_key)).length)+'"><div class="empty">No clients found</div></td></tr>';
+ $("clientsBody").innerHTML=filtered.map(c=>'<tr><td><button type="button" class="client-name-link" onclick="editClient(\''+c.id+'\')" title="Edit client" style="padding:0;background:transparent;border:0;color:var(--primary);font-weight:700;text-align:left;cursor:pointer">'+esc(c.name)+'</button></td><td><span>'+esc(c.phone||"—")+'</span> '+wa(c.phone,c.id,c.name)+'</td><td>'+esc(c.project||"—")+'</td><td>'+badge(c.status)+'</td>'+fields.filter(f=>!["name","phone","phone2","project","status"].includes(String(f.field_key||"").toLowerCase())).map(f=>'<td>'+esc((c[f.field_key]??(c.custom_fields||{})[f.field_key])??"—")+'</td>').join("")+'<td><div class="row-actions"><button class="secondary" onclick="editClient(\''+c.id+'\')">Edit</button><button class="danger" onclick="deleteClient(\''+c.id+'\')">Delete</button></div></td></tr>').join("")||'<tr><td colspan="'+(5+fields.filter(f=>f.is_active!==false&&!["name","phone","phone2","project","status"].includes(f.field_key)).length)+'"><div class="empty">No clients found</div></td></tr>';
  const cancelQ=($("cancelSearch")?.value||"").trim().toLowerCase(),cancelStatus=$("cancelStatusFilter")?.value||"all";
  const canceled=clients.filter(c=>isCanceled(c)&&(!cancelQ||(String(c.name||"")+" "+String(c.phone||"")+" "+String(c.project||"")).toLowerCase().includes(cancelQ))&&(cancelStatus==="all"||String(c.status||"").toLowerCase()===cancelStatus));
  const cancelSummary=$("cancelSummary");if(cancelSummary)cancelSummary.textContent="Showing "+canceled.length+" of "+clients.filter(isCanceled).length+" closed leads";
@@ -470,7 +470,7 @@ function openModal(c=null){
  $("labelNotes").textContent=fieldLabel("notes","Notes");
  loadClientComments(c?.id||null); $("newComment").value="";
  const box=$("customFieldsContainer"), vals=c?.custom_fields||{};
- const activeCustomFields=fields.filter(f=>f.is_active!==false&&!["name","phone","phone2","project","budget","status","notes"].includes(f.field_key));
+ const activeCustomFields=fields.filter(f=>!["name","phone","phone2","project","budget","status","notes"].includes(String(f.field_key||"").toLowerCase()));
  box.innerHTML=activeCustomFields.map(f=>{
   let v=vals[f.field_key]??"";
    if(f.field_type==="select")return '<div class="field full"><label>'+esc(f.label)+'</label><select data-custom-key="'+esc(f.field_key)+'"><option value="">—</option>'+((f.options||[]).map(o=>{const label=String(o&&typeof o==="object"?(o.label??o.value??""):o);const value=String(o&&typeof o==="object"?(o.value??o.label??""):o);return '<option value="'+esc(value)+'" '+(value===String(v)||label===String(v)?"selected":"")+' >'+esc(label)+'</option>'}).join(""))+'</select></div>';

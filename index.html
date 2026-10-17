@@ -317,7 +317,7 @@ async function ensureFields(){
   }
   const cancellationField=fields.find(x=>x.field_key==="cancellation");
   const cancellationOptions=["Not Interested","Wrong Number","Bought","Broker"];
-  if(cancellationField&&(cancellationField.label!=="Cancellation"||cancellationField.field_type!=="select"||JSON.stringify((cancellationField.options||[]).map(o=>typeof o==="object"?(o.label||o.value):o))!==JSON.stringify(cancellationOptions))){
+  if(cancellationField&&(cancellationField.label!=="Cancellation"||cancellationField.field_type!=="select"||cancellationField.is_active===false||JSON.stringify((cancellationField.options||[]).map(o=>typeof o==="object"?(o.label||o.value):o))!==JSON.stringify(cancellationOptions))){
    const upd=await sb.from("crm_fields").update({label:"Cancellation",field_type:"select",options:cancellationOptions,is_active:true}).eq("id",cancellationField.id).eq("user_id",user.id).select("*").single();
    if(upd.error)throw new Error("Unable to configure Cancellation field: "+upd.error.message);
    fields=fields.map(x=>x.id===cancellationField.id?upd.data:x);
@@ -367,7 +367,7 @@ async function load(){
 }
 function fieldLabel(key,fallback){return fields.find(f=>f.field_key===key)?.label||fallback}
 function isCoreField(f){return ["name","phone","phone2","project","budget","status","notes"].includes(String(f?.field_key||"").trim().toLowerCase())}
-function isVisibleCustomField(f){return !isCoreField(f)&&f.is_active!==false}
+function isVisibleCustomField(f){return (!isCoreField(f)||String(f?.field_key||"").trim().toLowerCase()==="cancellation")&&f.is_active!==false}
 function customFieldValue(client,key){
  const values=client?.custom_fields;
  if(!values)return "";

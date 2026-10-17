@@ -368,7 +368,7 @@ function customFieldValue(client,key){
 }
 function renderFields(){
  const box=$("fieldsList"); if(!box)return;
- box.innerHTML=fields.map(f=>{
+ box.innerHTML=fields.filter(f=>f.is_active!==false).map(f=>{
   const type={text:"Text",textarea:"Long Text",number:"Number",date:"Date",select:"Options"}[f.field_type]||f.field_type;
   const options=f.field_type==="select" ? ((f.options||[]).map(o=>typeof o==="object"?o.label:o).join("، ")) : "";
   const optionsEditor=f.field_type==="select" ? `<div style="grid-column:1/-1;margin-top:6px"><div class="muted" style="margin-bottom:5px">Options ${esc(f.label)}</div><input data-field-options="${esc(f.id)}" value="${esc(options)}" placeholder="e.g. New, Follow-up, Interested, Contracted"></div>` : "";
@@ -496,7 +496,21 @@ window.closeModal=closeModal;
 window.editClient=id=>openModal(clients.find(c=>c.id===id));
 window.deleteClient=async id=>{if(!confirm("Delete this client?"))return;await sb.from("clients").delete().eq("id",id);await load()};
 window.closeFieldModal=()=>$("fieldModal").classList.add("hidden");
-window.deleteField=async id=>{if(!confirm("Delete this field?"))return;await sb.from("crm_fields").update({is_active:false}).eq("id",id).eq("user_id",user.id);await load()};
+window.deleteField=async id=>{
+ if(!user?.id){alert("Please log in again.");return}
+ const field=fields.find(f=>f.id===id);
+ if(!field){alert("This field could not be found. Refresh the page and try again.");return}
+ if(field.is_system){alert("System fields cannot be deleted.");return}
+ if(!confirm('Delete the field "'+field.label+'"? Existing client data will be kept in the database but the field will be hidden.'))return;
+ try{
+  const result=await sb.from("crm_fields").update({is_active:false}).eq("id",id).eq("user_id",user.id).select("id").maybeSingle();
+  if(result.error)throw result.error;
+  if(!result.data)throw new Error("The field was not updated. Check your account permissions and try again.");
+  fields=fields.filter(f=>f.id!==id);
+  renderFields();render();
+  alert("Field deleted successfully.");
+ }catch(e){console.error(e);alert("Could not delete field: "+(e.message||"Unknown error"))}
+};
 $("clientForm").onsubmit=async e=>{
  e.preventDefault();
  const saveBtn=$("clientForm").querySelector('button[type="submit"]');
@@ -578,14 +592,24 @@ document.querySelectorAll("[data-followup-offset]").forEach(btn=>btn.addEventLis
 $("addFieldBtn").onclick=()=>$("fieldModal").classList.remove("hidden");
 $("newFieldType").onchange=()=>{$("newFieldOptionsWrap").style.display=$("newFieldType").value==="select"?"block":"none"};
 $("createField").onclick=async()=>{
+ const btn=$("createField");if(btn.disabled)return;
  const label=$("newFieldLabel").value.trim(), type=$("newFieldType").value;
- if(!label){alert("Please enter a field name first");return}
+ if(!user?.id){alert("Please log in again.");return}
+ if(!label){alert("Please enter a field name first");$("newFieldLabel").focus();return}
  const options=type==="select"?$("newFieldOptions").value.split(/[,،\n]/).map(x=>x.trim()).filter(Boolean):[];
- const key="custom_"+Date.now();
- const {error}=await sb.from("crm_fields").insert({user_id:user.id,field_key:key,label,field_type:type,options,is_system:false,is_active:true,sort_order:(fields.reduce((m,x)=>Math.max(m,x.sort_order||0),0)+1)});
- if(error){alert("Unable to add field: "+error.message);return}
- $("newFieldLabel").value="";$("newFieldOptions").value="";$("newFieldOptionsWrap").style.display="none";$("fieldModal").classList.add("hidden");
- await load();showPage("settings");
+ if(type==="select"&&!options.length){alert("Please add at least one option for this field.");$("newFieldOptions").focus();return}
+ btn.disabled=true;const oldText=btn.textContent;btn.textContent="Adding...";
+ try{
+  const key="custom_"+Date.now();
+  const result=await sb.from("crm_fields").insert({user_id:user.id,field_key:key,label,field_type:type,options,is_system:false,is_active:true,sort_order:(fields.reduce((m,x)=>Math.max(m,x.sort_order||0),0)+1)}).select("*").single();
+  if(result.error)throw result.error;
+  if(!result.data)throw new Error("The field was not created. Please try again.");
+  fields.push(result.data);fields.sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+  $("newFieldLabel").value="";$("newFieldOptions").value="";$("newFieldOptionsWrap").style.display="none";$("fieldModal").classList.add("hidden");
+  renderFields();render();showPage("settings");
+  alert("Field added successfully.");
+ }catch(e){console.error(e);alert("Could not add field: "+(e.message||"Unknown error"))}
+ finally{btn.disabled=false;btn.textContent=oldText}
 };
 $("saveFields").onclick=async()=>{
  const saveBtn=$("saveFields");saveBtn.disabled=true;const oldText=saveBtn.textContent;saveBtn.textContent="Saving...";

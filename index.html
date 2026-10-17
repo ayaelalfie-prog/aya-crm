@@ -490,6 +490,7 @@ function openModal(c=null){
  loadClientComments(c?.id||null); $("newComment").value="";
  const box=$("customFieldsContainer"), vals=c?.custom_fields||{};
  const activeCustomFields=fields.filter(isVisibleCustomField);
+ if(!activeCustomFields.some(f=>f.field_key==="cancellation")) activeCustomFields.push({field_key:"cancellation",label:"Cancellation",field_type:"select",is_active:true,options:["Not Interested","Wrong Number","Bought","Broker"]});
  box.innerHTML=activeCustomFields.map(f=>{
   let v=vals[f.field_key]??"";
    if(f.field_type==="select")return '<div class="field full"><label>'+esc(f.label)+'</label><select data-custom-key="'+esc(f.field_key)+'"><option value="">—</option>'+((f.options||[]).map(o=>{const label=String(o&&typeof o==="object"?(o.label??o.value??""):o);const value=String(o&&typeof o==="object"?(o.value??o.label??""):o);return '<option value="'+esc(value)+'" '+(value===String(v)||label===String(v)?"selected":"")+' >'+esc(label)+'</option>'}).join(""))+'</select></div>';

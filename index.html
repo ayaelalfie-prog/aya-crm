@@ -407,8 +407,10 @@ function render(){
   if(leadFilter==="overdue"&&!overdue)return false;
   if(leadFilter==="followup"&&!hasFollowup)return false;
   if(leadFilter==="no_followup"&&cf.length>0)return false;
-  if(leadFilter==="no_response"&&c.status!=="no_response"&&String(c.status||"").toLowerCase()!=="no response")return false;
-   const statusFilter=$("statusFilter")?.value||"all";if(statusFilter!=="all"&&String(c.status||"").toLowerCase()!==statusFilter)return false;
+  const normalizedStatus=String(c.status||"").trim().toLowerCase().replace(/[ _-]+/g," ");
+  const isNoAnswer=["no_response","no answer","no response","noanswer"].includes(normalizedStatus);
+  if(leadFilter==="no_response"&&!isNoAnswer)return false;
+  const statusFilter=$("statusFilter")?.value||"all";if(statusFilter!=="all"&&!(statusFilter==="no_response"?isNoAnswer:normalizedStatus===statusFilter.replace(/_/g," ")))return false;
   return true;
  });
  const summary=$("filterSummary");if(summary)summary.textContent=filtered.length+" of "+clients.length+" clients";
@@ -443,9 +445,10 @@ $("addCommentBtn").onclick=async()=>{const clientId=$("clientId").value, input=$
 function renderStatusOptions(selected){
  const sel=$("cStatus"); if(!sel)return;
  const sf=fields.find(f=>f.field_key==="status");
- const raw=sf?.options?.length?sf.options:["New","Follow-up","Interested","Contracted","Not Interested","No Response","Bought"];
- const known={New:"new","Follow-up":"followup",Interested:"interested","Contracted":"contracted","Not Interested":"not_interested","No Response":"no_response",Bought:"bought","Wrong Number":"wrong_number",Broker:"broker"};
- const opts=raw.map(o=>typeof o==="object"?o:{value:known[o]||o,label:o});
+ const raw=sf?.options?.length?sf.options:["New","Follow-up","Interested","Meeting","Contracted","Not Interested","No Answer","Bought","Wrong Number","Broker"];
+ const known={New:"new","Follow-up":"followup",Interested:"interested",Meeting:"meeting",Contracted:"contracted","Not Interested":"not_interested","No Response":"no_response","No Answer":"no_response",Bought:"bought","Wrong Number":"wrong_number",Broker:"broker"};
+ const opts=raw.map(o=>{if(typeof o==="object"){const label=String(o.label||o.value||"");return {...o,value:known[label]||known[o.value]||o.value,label:label==="No Response"?"No Answer":label};}return {value:known[o]||o,label:o==="No Response"?"No Answer":o};});
+ if(!opts.some(o=>o.value==="no_response"))opts.push({value:"no_response",label:"No Answer"});
  sel.innerHTML=opts.map(o=>'<option value="'+esc(o.value)+'">'+esc(o.label)+'</option>').join("");
  if(selected && opts.some(o=>String(o.value)===String(selected)))sel.value=selected;
 }

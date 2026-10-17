@@ -295,7 +295,8 @@ async function ensureFields(){
   ["project","Project","select",true,4,["Vivenda - North House","Vivenda - First District","Vivenda - Fourth District","Vivenda - Fifth District","Vivenda - Lotus Sector 4","Vivenda - El Mostashareen Compound","Vivenda - Gardenia","Vivenda - Andalus","Vivenda - New Narges","Vivenda - Beit El Watan","Barwa - Central Mall","Barwa Mall","Hapt 5 Mall","Zahraa El-Asma’a Mall","Solas Mall","Other"]],
   ["budget","Budget","number",true,4,[]],
   ["status","Status","select",true,5,["New","Follow-up","Interested","Contracted","Not Interested"]],
-  ["notes","Notes","textarea",true,6,[]]
+  ["notes","Notes","textarea",true,6,[]],
+  ["cancellation","Cancellation","select",true,7,["Not Interested","Wrong Number","Bought","Broker"]]
  ];
  const r=await sb.from("crm_fields").select("*").eq("user_id",user.id).order("sort_order",{ascending:true});
  if(r.error)throw new Error("Error loading fields: "+r.error.message);
@@ -313,6 +314,13 @@ async function ensureFields(){
    const ins=await sb.from("crm_fields").insert(missing).select("*");
    if(ins.error)throw new Error("Error completing fields: "+ins.error.message);
    fields=[...fields,...(ins.data||[])];
+  }
+  const cancellationField=fields.find(x=>x.field_key==="cancellation");
+  const cancellationOptions=["Not Interested","Wrong Number","Bought","Broker"];
+  if(cancellationField&&(cancellationField.label!=="Cancellation"||cancellationField.field_type!=="select"||JSON.stringify((cancellationField.options||[]).map(o=>typeof o==="object"?(o.label||o.value):o))!==JSON.stringify(cancellationOptions))){
+   const upd=await sb.from("crm_fields").update({label:"Cancellation",field_type:"select",options:cancellationOptions,is_active:true}).eq("id",cancellationField.id).eq("user_id",user.id).select("*").single();
+   if(upd.error)throw new Error("Unable to configure Cancellation field: "+upd.error.message);
+   fields=fields.map(x=>x.id===cancellationField.id?upd.data:x);
   }
   const projectField=fields.find(x=>x.field_key==="project");
   const projectDefault=defaults.find(x=>x[0]==="project");

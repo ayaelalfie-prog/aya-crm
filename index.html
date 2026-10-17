@@ -802,7 +802,7 @@ window.openDashboardCard=function(kind){
  else $("statusFilter").value="all";
  render();
 };
-window.showPage=async function(page){document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));const target=document.getElementById(page);if(target)target.classList.remove("hidden");const btn=document.querySelector(".nav button[data-page=\""+page+"\"]");if(btn)document.getElementById("pageTitle").textContent=btn.textContent.replace(/^\S+\s*/,"");window.scrollTo({top:0,left:0,behavior:"auto"});const main=document.querySelector("#app>.main");if(main)main.scrollTop=0;if(page==="backups")await loadBackups();};
+window.showPage=async function(page){try{sessionStorage.setItem("crmLastPage",page)}catch(e){}document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));document.querySelectorAll(".page").forEach(x=>x.classList.add("hidden"));const target=document.getElementById(page);if(target)target.classList.remove("hidden");const btn=document.querySelector(".nav button[data-page=\""+page+"\"]");if(btn)document.getElementById("pageTitle").textContent=btn.textContent.replace(/^\S+\s*/,"");window.scrollTo({top:0,left:0,behavior:"auto"});const main=document.querySelector("#app>.main");if(main)main.scrollTop=0;if(page==="backups")await loadBackups();};
 
 $("signupBtn").onclick=async()=>{
  try{
@@ -817,7 +817,7 @@ window.start=async function start(s){
  user=s?.user||null;
  if(!user){$("auth").classList.remove("hidden");$("app").classList.add("hidden");return}
  $("auth").classList.add("hidden");$("app").classList.remove("hidden");
- try{await load();notifySoon()}
+ try{await load();let lastPage="dashboard";try{const savedPage=sessionStorage.getItem("crmLastPage");if(savedPage&&document.getElementById(savedPage))lastPage=savedPage}catch(e){}await window.showPage(lastPage);notifySoon()}
  catch(e){
   console.error(e);
   const msg="Some CRM data could not be loaded: "+(e.message||"Unknown error");

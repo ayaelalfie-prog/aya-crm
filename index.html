@@ -281,7 +281,7 @@ if(earlyLoginBtn){
    const result=await sb.auth.signInWithPassword({email,password});
    if(result.error){earlyAuthMsg.textContent=result.error.message||"Invalid email or password.";return}
    earlyAuthMsg.textContent="Login successful...";
-   await start(result.data.session);
+   if(typeof window.start!=="function")throw new Error("CRM is still loading. Please wait a moment and try again."); await window.start(result.data.session);
   }catch(e){console.error(e);earlyAuthMsg.textContent="Login error: "+(e.message||"Unknown error")}
   finally{earlyLoginBtn.disabled=false;earlyLoginBtn.textContent="Login"}
  };

@@ -599,7 +599,7 @@ $("clientForm").onsubmit=async e=>{
   }
   render();
   closeModal();
-  showPage("dashboard");
+  // Stay on the current CRM page; the user chooses when to navigate away.
   alert(id?"Client updated successfully":"Client added successfully");
  }catch(err){
   console.error(err);

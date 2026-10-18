@@ -240,7 +240,7 @@ html,body{scroll-padding-top:0}body{overflow-anchor:none}#app>.main{overflow-y:v
    const r=await client.auth.signInWithPassword({email,password});
    if(r.error){msg.textContent="Login failed: "+(r.error.message||"Invalid email or password");return;}
    msg.textContent="Login successful. Opening CRM...";
-   await window.start(r.data.session);
+   if(typeof window.start==="function"){await window.start(r.data.session);}else{msg.textContent="Login successful. Reloading CRM...";window.location.reload();return;}
   }catch(e){console.error(e); msg.textContent="Error: "+(e?.message||"Unknown error");}
   finally{btn.disabled=false;btn.textContent="Login";}
  };

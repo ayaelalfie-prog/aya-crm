@@ -446,8 +446,24 @@ function render(){
  const cancelSummary=$("cancelSummary");if(cancelSummary)cancelSummary.textContent="Showing "+canceled.length+" of "+clients.filter(isCanceled).length+" closed leads";
  const cancelBody=$("cancelationBody");if(cancelBody)cancelBody.innerHTML=canceled.map(c=>'<tr><td><b>'+esc(c.name)+'</b></td><td><span>'+esc(c.phone||"—")+'</span> '+wa(c.phone,c.id,c.name)+'</td><td>'+esc(c.project||"—")+'</td><td>'+badge(c.status)+'</td><td><div class="row-actions"><button class="secondary" onclick="editClient(\''+c.id+'\')">Edit / Return</button></div></td></tr>').join("")||'<tr><td colspan="5"><div class="empty">No clients match these filters.</div></td></tr>';
  const ff=$("filterFollow")?.value||"all"; const fl=followups.filter(x=>ff==="all"||ff==="open"&&!x.completed||ff==="done"&&x.completed);
- $("followupsList").innerHTML=fl.map(f=>'<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>'+esc(f.clients?.name||"Client")+'</b><div class="muted">'+wa(f.clients?.phone,f.client_id,f.clients?.name)+'</div></div><div class="muted">'+fmt(f.followup_at)+'</div></div><p>'+esc(f.note||"No notes")+'</p><button class="'+(f.completed?"secondary":"primary")+'" onclick="toggleFollow(\''+f.id+'\','+(f.completed?"false":"true")+')">'+(f.completed?"Cancel Completion":"Follow-up completed")+'</button></div>').join("")||'<div class="empty">No follow-ups</div>';
+ $("followupsList").innerHTML=fl.map(f=>'<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:10px"><div><b>'+esc(f.clients?.name||"Client")+'</b><div class="muted">'+wa(f.clients?.phone,f.client_id,f.clients?.name)+'</div></div><div class="muted">'+fmt(f.followup_at)+'</div></div><p>'+esc(f.note||"No notes")+'</p><button class="'+(f.completed?"secondary":"primary")+'" onclick="toggleFollow(\''+f.id+'\','+(f.completed?"false":"true")+')">'+(f.completed?"Cancel Completion":"Follow-up completed")+'</button><button type="button" class="secondary" onclick="editFollow(\''+f.id+'\')">Edit Follow-up</button></div>').join("")||'<div class="empty">No follow-ups</div>';
 }
+window.toggleFollow=async function(id,completed){
+ const item=followups.find(x=>String(x.id)===String(id));if(!item)return;
+ const result=await sb.from("followups").update({completed}).eq("id",id).eq("user_id",user.id).select().single();
+ if(result.error){alert("Unable to update follow-up: "+result.error.message);return;}
+ followups=followups.map(x=>String(x.id)===String(id)?{...x,...result.data,clients:x.clients}:x);render();
+};
+window.editFollow=async function(id){
+ const item=followups.find(x=>String(x.id)===String(id));if(!item)return;
+ const d=new Date(item.followup_at),localDate=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+ const enteredDate=prompt("Edit follow-up date and time (YYYY-MM-DDTHH:MM):",localDate);if(enteredDate===null)return;
+ const parsed=new Date(enteredDate);if(!enteredDate.trim()||Number.isNaN(parsed.getTime())){alert("Please enter a valid date and time.");return;}
+ const note=prompt("Edit follow-up note:",item.note||"");if(note===null)return;
+ const result=await sb.from("followups").update({followup_at:parsed.toISOString(),note:note.trim()||null}).eq("id",id).eq("user_id",user.id).select().single();
+ if(result.error){alert("Unable to edit follow-up: "+result.error.message);return;}
+ followups=followups.map(x=>String(x.id)===String(id)?{...x,...result.data,clients:x.clients}:x);render();alert("Follow-up updated successfully.");
+};
 function renderDashboardSearch(){
  const input=$("dashboardSearch"),box=$("dashboardSearchResults");if(!input||!box)return;
  const q=input.value.trim().toLowerCase();

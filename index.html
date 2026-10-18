@@ -264,6 +264,7 @@ const SUPABASE_URL="https://flnbcyhgmhvoctibhdqz.supabase.co";
 const SUPABASE_KEY="sb_publishable_4oUbQU3Lq7RfGdRADTjXhQ_Cj61_FRr";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let user=null, clients=[], followups=[], fields=[], clientComments=[], activities=[];
+ let activeHistoryClientId=null;
 const $=id=>document.getElementById(id);
 window.start=async function start(s){
  user=s?.user||null;
@@ -486,16 +487,17 @@ function wa(phone,clientId,name){let p=String(phone||"").replace(/[٠-٩]/g,d=>"
 async function loadClientHistory(clientId){
  const box=$("clientHistoryList");if(!box)return;
  const targetId=String(clientId||"").trim();
+ activeHistoryClientId=targetId;
  box.innerHTML="";
  if(!targetId){box.innerHTML='<div class="muted">Save the client first to start a dated history.</div>';return;}
  const r=await sb.from("crm_activities").select("*").eq("user_id",user.id).eq("client_id",targetId).order("created_at",{ascending:false}).limit(100);
  if(r.error){box.innerHTML='<div class="muted">Unable to load history: '+esc(r.error.message)+'</div>';return;}
- if(String($("clientId").value||"").trim()!==targetId)return;
+ if(String(activeHistoryClientId||"").trim()!==targetId||String($("clientId").value||"").trim()!==targetId)return;
  const rows=(r.data||[]).filter(a=>String(a.client_id||"").trim()===targetId);
  box.innerHTML=rows.map(a=>'<div class="card" style="padding:10px"><div class="muted">'+fmt(a.created_at)+'</div><div style="font-weight:600;margin:4px 0">'+esc(a.action_type||"Update")+'</div><div>'+esc(a.description||"")+'</div></div>').join("")||'<div class="muted">No history yet. Save an update below.</div>';
 }
 $("addHistoryUpdate").onclick=async()=>{
- const id=String($("clientId").value||"").trim(),input=$("historyUpdateText"),description=input.value.trim();
+ const id=String(activeHistoryClientId||"").trim(),input=$("historyUpdateText"),description=input.value.trim();
  if(!id)return alert("Save the client first, then add an update.");
  if(!clients.some(c=>String(c.id).trim()===id))return alert("Client not found. Close and reopen this client before saving history.");
  if(!description)return alert("Write an update first.");
@@ -552,7 +554,7 @@ function openModal(c=null){
  $("cBudget").previousElementSibling.textContent=fieldLabel("budget","Budget");
  $("cStatus").previousElementSibling.textContent=fieldLabel("status","Status");
  $("labelNotes").textContent=fieldLabel("notes","Notes");
- $("commentsField").style.display=c?.id?"":"none"; $("historyField").style.display=c?.id?"":"none"; loadClientComments(c?.id||null); loadClientHistory(c?.id||null); $("newComment").value=""; $("historyUpdateText").value="";
+ activeHistoryClientId=String(c?.id||"").trim(); $("clientHistoryList").innerHTML=""; $("commentsField").style.display=c?.id?"":"none"; $("historyField").style.display=c?.id?"":"none"; loadClientComments(c?.id||null); loadClientHistory(c?.id||null); $("newComment").value=""; $("historyUpdateText").value="";
  const box=$("customFieldsContainer"), vals=c?.custom_fields||{};
  const activeCustomFields=fields.filter(isVisibleCustomField);
  if(!activeCustomFields.some(f=>f.field_key==="cancellation")) activeCustomFields.push({field_key:"cancellation",label:"Cancellation",field_type:"select",is_active:true,options:["Not Interested","Wrong Number","Bought","Broker"]});

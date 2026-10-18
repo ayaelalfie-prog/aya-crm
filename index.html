@@ -240,7 +240,7 @@ html,body{scroll-padding-top:0}body{overflow-anchor:none}#app>.main{overflow-y:v
    const r=await client.auth.signInWithPassword({email,password});
    if(r.error){msg.textContent="Login failed: "+(r.error.message||"Invalid email or password");return;}
    msg.textContent="Login successful. Opening CRM...";
-   if(typeof window.start==="function"){await window.start(r.data.session);}else{msg.textContent="Login successful. Reloading CRM...";window.location.reload();return;}
+   let attempts=0;while(typeof window.start!=="function"&&attempts<40){await new Promise(resolve=>setTimeout(resolve,250));attempts++;}if(typeof window.start!=="function")throw new Error("CRM startup did not finish. Refresh the page and try again.");await window.start(r.data.session);
   }catch(e){console.error(e); msg.textContent="Error: "+(e?.message||"Unknown error");}
   finally{btn.disabled=false;btn.textContent="Login";}
  };
@@ -281,7 +281,7 @@ if(earlyLoginBtn){
    const result=await sb.auth.signInWithPassword({email,password});
    if(result.error){earlyAuthMsg.textContent=result.error.message||"Invalid email or password.";return}
    earlyAuthMsg.textContent="Login successful...";
-   if(typeof window.start!=="function")throw new Error("CRM is still loading. Please wait a moment and try again."); await window.start(result.data.session);
+   let attempts=0;while(typeof window.start!=="function"&&attempts<40){await new Promise(resolve=>setTimeout(resolve,250));attempts++;}if(typeof window.start!=="function")throw new Error("CRM startup did not finish. Refresh the page and try again.");await window.start(result.data.session);
   }catch(e){console.error(e);earlyAuthMsg.textContent="Login error: "+(e.message||"Unknown error")}
   finally{earlyLoginBtn.disabled=false;earlyLoginBtn.textContent="Login"}
  };

@@ -265,6 +265,22 @@ const SUPABASE_KEY="sb_publishable_4oUbQU3Lq7RfGdRADTjXhQ_Cj61_FRr";
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let user=null, clients=[], followups=[], fields=[], clientComments=[], activities=[];
 const $=id=>document.getElementById(id);
+window.start=async function start(s){
+ user=s?.user||null;
+ if(!user){$("auth").classList.remove("hidden");$("app").classList.add("hidden");return}
+ $("auth").classList.add("hidden");$("app").classList.remove("hidden");
+ try{await load();let lastPage="dashboard";try{const savedPage=sessionStorage.getItem("crmLastPage");if(savedPage&&document.getElementById(savedPage))lastPage=savedPage}catch(e){}await window.showPage(lastPage);notifySoon()}
+ catch(e){
+  console.error(e);
+  const msg="Some CRM data could not be loaded: "+(e.message||"Unknown error");
+  console.error(msg);
+  const title=$("pageTitle");
+  if(title)title.textContent="Dashboard";
+  const dash=$("dashboard");
+  if(dash && !clients.length)dash.insertAdjacentHTML("afterbegin",'<div class="settings-note" style="margin-bottom:14px">'+esc(msg)+'</div>');
+ }
+}
+
 async function logActivity(clientId,actionType,description){
  if(!user?.id)return;
  try{const r=await sb.from("crm_activities").insert({user_id:user.id,client_id:clientId||null,action_type:actionType||"action",description});if(r.error){console.warn("Activity could not be logged:",r.error.message);return;}activities.unshift(r.data||{client_id:clientId,action_type:actionType,description,created_at:new Date().toISOString()});renderActivityCount();}catch(e){console.warn("Activity could not be logged:",e);}
@@ -814,21 +830,6 @@ $("signupBtn").onclick=async()=>{
  }catch(e){$("authMsg").textContent="Error creating account."}
 };
 $("logout").onclick=()=>sb.auth.signOut();
-window.start=async function start(s){
- user=s?.user||null;
- if(!user){$("auth").classList.remove("hidden");$("app").classList.add("hidden");return}
- $("auth").classList.add("hidden");$("app").classList.remove("hidden");
- try{await load();let lastPage="dashboard";try{const savedPage=sessionStorage.getItem("crmLastPage");if(savedPage&&document.getElementById(savedPage))lastPage=savedPage}catch(e){}await window.showPage(lastPage);notifySoon()}
- catch(e){
-  console.error(e);
-  const msg="Some CRM data could not be loaded: "+(e.message||"Unknown error");
-  console.error(msg);
-  const title=$("pageTitle");
-  if(title)title.textContent="Dashboard";
-  const dash=$("dashboard");
-  if(dash && !clients.length)dash.insertAdjacentHTML("afterbegin",'<div class="settings-note" style="margin-bottom:14px">'+esc(msg)+'</div>');
- }
-}
 async function getBackupSnapshot(){return {version:1,created_at:new Date().toISOString(),clients:clients,followups:followups,fields:fields};}
 async function loadBackups(){
  const r=await sb.from("crm_backups").select("id,created_at,label,snapshot").eq("user_id",user.id).order("created_at",{ascending:false});

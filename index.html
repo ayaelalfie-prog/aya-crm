@@ -497,12 +497,20 @@ async function loadClientHistory(clientId){
  box.innerHTML=rows.map(a=>'<div class="card" style="padding:10px"><div class="muted">'+fmt(a.created_at)+'</div><div style="font-weight:600;margin:4px 0">'+esc(a.action_type||"Update")+'</div><div>'+esc(a.description||"")+'</div></div>').join("")||'<div class="muted">No history yet. Save an update below.</div>';
 }
 $("addHistoryUpdate").onclick=async()=>{
- const id=String($("modal").dataset.clientId||$("clientId").value||activeHistoryClientId||"").trim(),input=$("historyUpdateText"),description=input.value.trim();
- if(!id)return alert("Save the client first, then add an update.");
- if(!clients.some(c=>String(c.id).trim()===id))return alert("This client has not been saved yet. Click Save at the bottom of the form first, then add the history update.");
+ const input=$("historyUpdateText"),description=input.value.trim();
+ const id=String($("clientId").value||$("modal").dataset.clientId||activeHistoryClientId||"").trim();
  if(!description)return alert("Write an update first.");
+ if(!user?.id)return alert("Your session expired. Please log in again.");
+ if(!id){
+  const name=$("cName").value.trim(),phone=$("cPhone").value.trim();
+  if(!name)return alert("Enter the client name and save the client first.");
+  return alert("The client ID is missing in this edit form. Close this window, reopen the client from the Clients list, save the client, then add the history update.");
+ }
+ const client=clients.find(c=>String(c.id||"").trim()===id);
+ if(!client && !$("cName").value.trim())return alert("Could not identify the client. Close and reopen the client from the Clients list.");
  const r=await sb.from("crm_activities").insert({user_id:user.id,client_id:id,action_type:"manual_update",description}).select().single();
  if(r.error)return alert("Unable to save update: "+r.error.message);
+ if(String(r.data.client_id)!==id)return alert("The database returned a different client ID. The update was not added to the visible history.");
  activities.unshift(r.data);input.value="";await loadClientHistory(id);renderActivityCount();
 };
 async function loadClientComments(clientId){

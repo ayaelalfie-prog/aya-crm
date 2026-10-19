@@ -522,8 +522,8 @@ async function loadClientComments(clientId){
  clientComments=clientComments.filter(x=>String(x.client_id)!==String(clientId)).concat(rows);
  box.innerHTML=rows.map(x=>`<div class="card" style="padding:10px"><div style="font-size:12px;color:#718096">${fmt(x.created_at)}</div><div style="margin-top:4px">${esc(x.comment)}</div><button type="button" class="danger" style="margin-top:7px" onclick="deleteComment('${x.id}')">Delete</button></div>`).join('')||'<div class="muted">No comments yet.</div>';
 }
-window.deleteComment=async id=>{if(!confirm("Delete comment?"))return;const activeClientId=String($("clientId").value||"");const r=await sb.from("client_comments").delete().eq("id",id).eq("user_id",user.id).eq("client_id",activeClientId);if(r.error)return alert("Unable to delete comment");clientComments=clientComments.filter(x=>x.id!==id);await loadClientComments($("clientId").value)};
-$("addCommentBtn").onclick=async()=>{const clientId=String($("clientId").value||"").trim(), input=$("newComment"), comment=input.value.trim();if(!clientId)return alert("Save the client first, then add a comment.");if(!clients.some(c=>String(c.id)===clientId))return alert("Could not identify this client. Close and reopen the client, then try again.");if(!comment)return;const r=await sb.from("client_comments").insert({user_id:user.id,client_id:clientId,comment}).select().single();if(r.error)return alert("Unable to add comment: "+r.error.message);if(String(r.data.client_id)!==String(clientId))return alert("Comment was not linked to the selected client. Please try again.");clientComments.unshift(r.data);await logActivity(clientId,"note_added","Added a note to "+(clients.find(c=>c.id===clientId)?.name||"client"));input.value="";await loadClientComments(clientId)};
+window.deleteComment=async id=>{if(!confirm("Delete comment?"))return;const activeClientId=String($("modal").dataset.clientId||$("clientId").value||activeHistoryClientId||"");const r=await sb.from("client_comments").delete().eq("id",id).eq("user_id",user.id).eq("client_id",activeClientId);if(r.error)return alert("Unable to delete comment");clientComments=clientComments.filter(x=>x.id!==id);await loadClientComments($("clientId").value)};
+$("addCommentBtn").onclick=async()=>{const clientId=String($("modal").dataset.clientId||$("clientId").value||activeHistoryClientId||"").trim(), input=$("newComment"), comment=input.value.trim();if(!clientId)return alert("Save the client first, then add a comment.");if(!clients.some(c=>String(c.id)===clientId))return alert("Could not identify this client. Close and reopen the client, then try again.");if(!comment)return;const r=await sb.from("client_comments").insert({user_id:user.id,client_id:clientId,comment}).select().single();if(r.error)return alert("Unable to add comment: "+r.error.message);if(String(r.data.client_id)!==String(clientId))return alert("Comment was not linked to the selected client. Please try again.");clientComments.unshift(r.data);await logActivity(clientId,"note_added","Added a note to "+(clients.find(c=>c.id===clientId)?.name||"client"));input.value="";await loadClientComments(clientId)};
 
 function renderStatusOptions(selected){
  const sel=$("cStatus"); if(!sel)return;
@@ -607,7 +607,7 @@ $("clientForm").onsubmit=async e=>{
  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent="Saving...";}
  try{
   if(!user?.id){throw new Error("Your session expired. Please log in again.");}
-  const id=$("clientId").value.trim();
+  const id=String($("modal").dataset.clientId||$("clientId").value||"").trim();
   const custom_fields={};
   document.querySelectorAll("[data-custom-key]").forEach(el=>{custom_fields[el.dataset.customKey]=el.value;});
   custom_fields.phone2=$("cPhone2").value.trim()||"";

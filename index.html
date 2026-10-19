@@ -573,7 +573,7 @@ function updatePhoneWhatsAppIcons(clientId,name){
 }
 function closeModal(){$("modal").classList.add("hidden")}
 window.closeModal=closeModal;
-window.editClient=id=>openModal(clients.find(c=>c.id===id));
+window.editClient=id=>{const targetId=String(id||"").trim();const client=clients.find(c=>String(c.id||"").trim()===targetId);if(!client){alert("Could not find this client. Please refresh the client list and try again.");return;}openModal(client);};
 window.deleteClient=async id=>{if(!confirm("Delete this client?"))return;await sb.from("clients").delete().eq("id",id);await load()};
 window.closeFieldModal=()=>$("fieldModal").classList.add("hidden");
 window.deleteField=async id=>{

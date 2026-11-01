@@ -270,7 +270,7 @@ window.start=async function start(s){
  user=s?.user||null;
  if(!user){$("auth").classList.remove("hidden");$("app").classList.add("hidden");return}
  $("auth").classList.add("hidden");$("app").classList.remove("hidden");
- try{await load();let lastPage="dashboard";try{const savedPage=sessionStorage.getItem("crmLastPage");if(savedPage&&document.getElementById(savedPage))lastPage=savedPage}catch(e){}await window.showPage(lastPage);notifySoon()}
+ try{await load();let lastPage="dashboard";try{const savedPage=sessionStorage.getItem("crmLastPage");if(savedPage&&document.getElementById(savedPage))lastPage=savedPage}catch(e){}const requestedClientId=new URLSearchParams(window.location.search).get("client");if(requestedClientId){await window.showPage("clients");const requestedClient=clients.find(c=>String(c.id)===String(requestedClientId));if(requestedClient)openModal(requestedClient);else alert("This client could not be found in your account.");}else{await window.showPage(lastPage)}notifySoon()}
  catch(e){
   console.error(e);
   const msg="Some CRM data could not be loaded: "+(e.message||"Unknown error");
@@ -583,7 +583,7 @@ function updatePhoneWhatsAppIcons(clientId,name){
 }
 function closeModal(){$("modal").classList.add("hidden")}
 window.closeModal=closeModal;
-window.editClient=id=>{const targetId=String(id||"").trim();const client=clients.find(c=>String(c.id||"").trim()===targetId);if(!client){alert("Could not find this client. Please refresh the client list and try again.");return;}openModal(client);};
+window.editClient=id=>{const targetId=String(id||"").trim();if(!targetId)return;const url=new URL(window.location.href);url.searchParams.set("client",targetId);const tab=window.open(url.toString(),"_blank");if(!tab)alert("Your browser blocked the new tab. Please allow pop-ups for this CRM and try again.");};
 window.deleteClient=async id=>{if(!confirm("Delete this client?"))return;await sb.from("clients").delete().eq("id",id);await load()};
 window.closeFieldModal=()=>$("fieldModal").classList.add("hidden");
 window.deleteField=async id=>{
